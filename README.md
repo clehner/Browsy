@@ -2,6 +2,8 @@
 
 A browser for System 6.
 
+![Browsy screenshot](https://cloud.githubusercontent.com/assets/95347/3683770/631346c6-12ed-11e4-8031-6242d7e36cfc.png)
+
 Currently this is mostly a UI concept, that can read local text files, manage
 history, and allow the user to push buttons.
 
