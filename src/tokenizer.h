@@ -4,7 +4,7 @@
 typedef enum {
 	DATA_STATE,
 	CHARACTER_REFERENCE_IN_DATA_STATE,
-	RCDATA_State,
+	RCDATA_STATE,
 	CHARACTER_REFERENCE_IN_RCDATA_STATE,
 	RAWTEXT_STATE,
 	SCRIPT_DATA_STATE,
@@ -75,7 +75,8 @@ typedef enum {
 typedef enum {
 	CHARACTER_TOKEN,
 	CHARACTER_TOKENS,
-	TAG_TOKEN
+	TAG_TOKEN,
+	EOF_TOKEN
 } TokenTypes;
 
 typedef struct {
@@ -83,6 +84,11 @@ typedef struct {
 	char *input;
 	short position;
 } Tokenizer;
+
+typedef struct {
+	char tagName[16];
+	short tagNameLength;
+} TagToken;
 
 Tokenizer *NewTokenizer();
 void DisposeTokenizer(Tokenizer *tokenizer);

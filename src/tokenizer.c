@@ -1,5 +1,8 @@
+#include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <Memory.h>
+#include <MacTypes.h>
 #include "tokenizer.h"
 
 Tokenizer *NewTokenizer() {
@@ -12,9 +15,13 @@ void DisposeTokenizer(Tokenizer *tokenizer) {
 	free(tokenizer);
 }
 
-char getchar(Tokenizer *tokenizer) {
+char readchar(Tokenizer *tokenizer) {
 
 }
+
+// Function prototypes
+char *ConsumeCharacterReference(Tokenizer *tokenizer);
+Boolean isAppropriateEndTagToken(TagToken *endTagToken);
 
 #define STATE tokenizer->state
 
@@ -76,21 +83,34 @@ char getchar(Tokenizer *tokenizer) {
 
 #define CASE_WHITESPACE \
 	case '\t': \
-	case '\012': \ // lf
+	case '\012': \
 	case '\r': \
 	case '\f': \
 	case ' ' \
 
+#define PARSE_ERROR()\
+	; // TODO
+
+#define EMIT(type, value)\
+	; // TODO
+
+#define EMIT_EOF_TOKEN\
+	; // TODO
+
+#define RECONSUME(input)\
+	continue
+
 void tokenize(Tokenizer *tokenizer) {
 	TokenizerState state = tokenizer->state;
-	static replacementChar = '\xfd'; // U+FFFD
+	static char replacementChar = '\xfd'; // U+FFFD
 	char tempBuffer[64];
 	char tempBufferL;
-	void *currentTagToken;
-	void *startTagToken;
-	void *endTagToken;
+	TagToken *currentTagToken;
+	TagToken *startTagToken;
+	TagToken *endTagToken;
+	char input;
 
-	while (input = getchar(tokenizer)) {
+	while (input = readchar(tokenizer)) {
 
 		switch (state) {
 		case DATA_STATE:
@@ -106,7 +126,7 @@ void tokenize(Tokenizer *tokenizer) {
 				EMIT(CHARACTER_TOKEN, '\0');
 				break;
 			case EOF:
-				EMIT(EOF_TOKEN);
+				EMIT_EOF_TOKEN;
 				break;
 			default:
 				EMIT(CHARACTER_TOKEN, input);
@@ -117,13 +137,13 @@ void tokenize(Tokenizer *tokenizer) {
 		{
 			char *charRefs = ConsumeCharacterReference(tokenizer);
 			if (charRefs) {
-				emit(CHARACTER_TOKENS, charRefs);
+				EMIT(CHARACTER_TOKENS, charRefs);
 			} else {
-				emit(CHARACTER_TOKEN, '&');
+				EMIT(CHARACTER_TOKEN, '&');
 			}
 		}
 		break;
-		case RCDATA_State:
+		case RCDATA_STATE:
 			switch(input) {
 			case '&':
 				STATE = CHARACTER_REFERENCE_IN_RCDATA_STATE;
@@ -136,7 +156,7 @@ void tokenize(Tokenizer *tokenizer) {
 				EMIT(CHARACTER_TOKEN, replacementChar);
 				break;
 			case EOF:
-				EMIT(EOF_TOKEN);
+				EMIT_EOF_TOKEN;
 				break;
 			default:
 				EMIT(CHARACTER_TOKEN, input);
@@ -147,9 +167,9 @@ void tokenize(Tokenizer *tokenizer) {
 		{
 			char *charRefs = ConsumeCharacterReference(tokenizer);
 			if (charRefs) {
-				emit(CHARACTER_TOKENS, charRefs);
+				EMIT(CHARACTER_TOKENS, charRefs);
 			} else {
-				emit(CHARACTER_TOKEN, '&');
+				EMIT(CHARACTER_TOKEN, '&');
 			}
 		}
 		break;
@@ -163,7 +183,7 @@ void tokenize(Tokenizer *tokenizer) {
 				EMIT(CHARACTER_TOKEN, replacementChar);
 				break;
 			case EOF:
-				EMIT(EOF_TOKEN);
+				EMIT_EOF_TOKEN;
 				break;
 			default:
 				EMIT(CHARACTER_TOKEN, input);
@@ -180,7 +200,7 @@ void tokenize(Tokenizer *tokenizer) {
 				EMIT(CHARACTER_TOKEN, replacementChar);
 				break;
 			case EOF:
-				EMIT(EOF_TOKEN);
+				EMIT_EOF_TOKEN;
 				break;
 			default:
 				EMIT(CHARACTER_TOKEN, input);
@@ -194,7 +214,7 @@ void tokenize(Tokenizer *tokenizer) {
 				EMIT(CHARACTER_TOKEN, replacementChar);
 				break;
 			case EOF:
-				EMIT(EOF_TOKEN);
+				EMIT_EOF_TOKEN;
 				break;
 			default:
 				EMIT(CHARACTER_TOKEN, input);
@@ -213,12 +233,14 @@ void tokenize(Tokenizer *tokenizer) {
 				// new startTagToken
 				startTagToken->tagName[0] = tolower(input);
 				startTagToken->tagName[1] = '\0';
+				startTagToken->tagNameLength = 1;
 				STATE = TAG_NAME_STATE;
 				break;
 			CASE_az:
 				// new startTagToken
 				startTagToken->tagName[0] = input;
 				startTagToken->tagName[1] = '\0';
+				startTagToken->tagNameLength = 1;
 				STATE = TAG_NAME_STATE;
 				break;
 			case '?':
@@ -239,12 +261,14 @@ void tokenize(Tokenizer *tokenizer) {
 				// new startTagToken
 				endTagToken->tagName[0] = tolower(input);
 				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				STATE = TAG_NAME_STATE;
 				break;
 			CASE_az:
 				// new startTagToken
 				endTagToken->tagName[0] = input;
 				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				STATE = TAG_NAME_STATE;
 				break;
 			case '>':
@@ -315,18 +339,22 @@ void tokenize(Tokenizer *tokenizer) {
 		case RCDATA_END_TAG_OPEN_STATE:
 			switch(input) {
 			CASE_AZ:
-				endTagToken->tagName = tolower(input);
+				endTagToken->tagName[0] = tolower(input);
+				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				if (tempBufferL+1 < sizeof(tempBuffer)) {
 					tempBuffer[tempBufferL++] = input;
 				}
-				STATE = RC_END_TAG_NAME_STATE;
+				STATE = RCDATA_END_TAG_NAME_STATE;
 				break;
 			CASE_az:
-				endTagToken->tagName = input;
+				endTagToken->tagName[0] = input;
+				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				if (tempBufferL+1 < sizeof(tempBuffer)) {
 					tempBuffer[tempBufferL++] = input;
 				}
-				STATE = RC_END_TAG_NAME_STATE;
+				STATE = RCDATA_END_TAG_NAME_STATE;
 				break;
 			default:
 				STATE = RCDATA_STATE;
@@ -340,14 +368,14 @@ void tokenize(Tokenizer *tokenizer) {
 				if (isAppropriateEndTagToken(endTagToken)) {
 					STATE = BEFORE_ATTRIBUTE_NAME_STATE;
 				} else {
-					goto fogettaboutit;
+					goto nowayjose;
 				}
 				break;
 			case '/':
 				if (isAppropriateEndTagToken(endTagToken)) {
 					STATE = SELF_CLOSING_START_TAG_STATE;
 				} else {
-					goto fogettaboutit;
+					goto nowayjose;
 				}
 				break;
 			case '>':
@@ -355,7 +383,7 @@ void tokenize(Tokenizer *tokenizer) {
 					STATE = DATA_STATE;
 					EMIT(TAG_TOKEN, endTagToken);
 				} else {
-					goto fogettaboutit;
+					goto nowayjose;
 				}
 				break;
 			CASE_AZ:
@@ -382,7 +410,7 @@ void tokenize(Tokenizer *tokenizer) {
 				STATE = RCDATA_STATE;
 				EMIT(CHARACTER_TOKENS, "</");
 				EMIT(CHARACTER_TOKENS, tempBuffer);
-				RECONSUME();
+				RECONSUME(input);
 			}
 		break;
 		case RAWTEXT_LESS_THAN_SIGN_STATE:
@@ -395,7 +423,7 @@ void tokenize(Tokenizer *tokenizer) {
 			default:
 				STATE = RAWTEXT_STATE;
 				EMIT(CHARACTER_TOKEN, '<');
-				RECONSUME();
+				RECONSUME(input);
 			}
 		break;
 		case RAWTEXT_END_TAG_OPEN_STATE:
@@ -404,6 +432,7 @@ void tokenize(Tokenizer *tokenizer) {
 				// new endTagToken
 				endTagToken->tagName[0] = tolower(input);
 				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				if (tempBufferL+1 < sizeof(tempBuffer)) {
 					tempBuffer[tempBufferL++] = input;
 				}
@@ -413,6 +442,7 @@ void tokenize(Tokenizer *tokenizer) {
 				// new endTagToken
 				endTagToken->tagName[0] = input;
 				endTagToken->tagName[1] = '\0';
+				endTagToken->tagNameLength = 1;
 				if (tempBufferL+1 < sizeof(tempBuffer)) {
 					tempBuffer[tempBufferL++] = input;
 				}
@@ -420,7 +450,7 @@ void tokenize(Tokenizer *tokenizer) {
 			default:
 				STATE = RAWTEXT_STATE;
 				EMIT(CHARACTER_TOKENS, "</");
-				RECONSUME();
+				RECONSUME(input);
 			}
 		break;
 		case RAWTEXT_END_TAG_NAME_STATE:
@@ -471,7 +501,7 @@ void tokenize(Tokenizer *tokenizer) {
 				STATE = RAWTEXT_STATE;
 				EMIT(CHARACTER_TOKENS, "</");
 				EMIT(CHARACTER_TOKENS, tempBuffer);
-				RECONSUME();
+				RECONSUME(input);
 			}
 		break;
 		case SCRIPT_DATA_LESS_THAN_SIGN_STATE:
@@ -987,12 +1017,16 @@ void tokenize(Tokenizer *tokenizer) {
 		case CDATA_SECTION_STATE:
 			switch(input) {
 			case '':
+				break;
 			}
 		break;
 		}
 	}
 }
 
-char *ConsumeCharacterReference(tokenizer) {
+char *ConsumeCharacterReference(Tokenizer *tokenizer) {
 	//http://whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
+}
+
+Boolean isAppropriateEndTagToken(TagToken *endTagToken) {
 }
