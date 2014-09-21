@@ -3,30 +3,32 @@ ARCH    = m68k-unknown-elf
 
 BIN     = Browsy
 CC      = $(TOOLCHAIN)/bin/$(ARCH)-gcc
+LD      = $(TOOLCHAIN)/bin/$(ARCH)-g++
+MAKE_APPL = $(TOOLCHAIN)/bin/MakeAPPL
 SRC     = $(wildcard src/*.c)
 INC     = $(wildcard src/*.h)
 OBJ     = $(SRC:.c=.o)
 DEP     = $(SRC:.c=.d)
-CFLAGS  = --std=gnu99 -O3 -DNDEBUG
-CFLAGS += -Wno-multichar -Wno-attributes -Wno-deprecated -Werror
-CFLAGS += -MMD -I$(TOOLCHAIN)/$(ARCH)/include
-LDFLAGS =
-
+CFLAGS  = -MMD
+CFLAGS += -O3 -DNDEBUG
+CFLAGS += -Wno-multichar -Wno-attributes -Wno-unused-function
+LDFLAGS = -lretrocrt -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite
 
 ifndef V
 	QUIET_CC   = @echo ' CC   ' $<;
 	QUIET_LINK = @echo ' LINK ' $@;
+	QUIET_APPL = @echo ' APPL ' $@;
 endif
 
 all: $(BIN).bin
 
 -include $(DEP)
 
-$(BIN).i: $(OBJ)
-	$(QUIET_LINK)$(CC) -o $@ $^ $(LDFLAGS)
+$(BIN): $(OBJ)
+	$(QUIET_LINK)$(LD) -o $@ $^ $(LDFLAGS)
 
-%.bin: %.i
-	$(TOOLCHAIN)/bin/MakeAPPL -c $< -o $*
+%.dsk %.bin: %
+	$(QUIET_APPL)$(MAKE_APPL) -c $< -o $*
 
 %.o: %.c
 	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $@ $<
@@ -35,7 +37,6 @@ wc:
 	@wc -l $(SRC) $(INC) | sort -n
 
 clean:
-	rm -f $(BIN) $(OBJ) $(DEP)
+	rm -f $(BIN) $(BIN).dsk $(BIN).bin $(OBJ) $(DEP) linkmap.txt
 
 .PHONY: clean wc
-
