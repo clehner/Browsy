@@ -29,20 +29,6 @@ enum {iconBack, iconForward, iconHome, iconStop};
 /*static Rect toolbarRects[] = {toolbarRectBack, toolbarRectForward,
 	toolbarRectHome, toolbarRectStop};*/
 
-// these don't seem to be including properly from ControlDefinitions.h
-enum {
-  //inLabel                       = kControlLabelPart,
-  //inMenu                        = kControlMenuPart,
-  //inTriangle                    = kControlTrianglePart,
-  inButton                      = 10,
-  inCheckBox                    = 11,
-  inUpButton                    = 20,
-  inDownButton                  = 21,
-  inPageUp                      = 22,
-  inPageDown                    = 23,
-  inThumb                       = 129
-};
-
 Rect toolbarButtonsRect = {4, 4, toolbarHeight, toolbarButtonsWidth + 4};
 
 Rect toolbarRectBack	= {5,  5, 21, 21}; // top left bottom right
@@ -414,15 +400,15 @@ void PageWindowMouseDown(PageWindow *pWin, Point where, int modifiers) {
 	} else {
 		switch(part) {
 			// Form element
-			case inButton:
+			case kControlButtonPart:
 				//if (TrackControl(ch, where, 0)) {
 				//if (where.top < toolbarHeight) {
 				break;
-			case inCheckBox:
+			case kControlCheckBoxPart:
 				break;
 
 			// Scroll bar
-			case inThumb:
+			case kControlIndicatorPart:
 				oldValue = GetControlValue(ch);
 				if (TrackControl(ch, where, 0)) {
 					delta = oldValue - GetControlValue(ch);
@@ -435,10 +421,10 @@ void PageWindowMouseDown(PageWindow *pWin, Point where, int modifiers) {
 					}
 				}
 				break;
-			case inUpButton:
-			case inDownButton:
-			case inPageUp:
-			case inPageDown:
+			case kControlUpButtonPart:
+			case kControlDownButtonPart:
+			case kControlPageUpPart:
+			case kControlPageDownPart:
 				TrackControl(ch, where, ScrollAction);
 				break;
 		}
@@ -462,10 +448,10 @@ static pascal void ScrollAction(ControlHandle control, short part) {
 		//: RoundDiv(r.bottom-r.top, win->vPitch))-1;
 	page = isH ? wr.right-wr.left : wr.bottom-wr.top;
 	switch(part) {
-		case inUpButton:   delta = -16;  break;
-		case inDownButton: delta = 16;   break;
-		case inPageUp:     delta = -page; break;
-		case inPageDown:   delta = page; break;
+		case kControlUpButtonPart:		delta = -16;	break;
+		case kControlDownButtonPart:	delta = 16;		break;
+		case kControlPageUpPart:		delta = -page;	break;
+		case kControlPageDownPart:		delta = page;	break;
 	}
 	//SetCtlValue(control, (ex = GetCtlValue(control)) + delta);
 	ex = (*control)->contrlValue;
