@@ -10,7 +10,7 @@ typedef struct Node {
 } Node;
 
 typedef struct {
-	Handle data;
+	void *data;
 	Node *rootNode;
 	Tokenizer *tokenizer;
 } DOMDocument;

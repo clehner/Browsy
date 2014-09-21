@@ -1,6 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
 #include <StandardFile.h>
 #include <StringCompare.h>
 #include "Browsy.h"
+#include "utils.h"
 
 // wait/get next event
 Boolean WNE(EventMask eventMask, EventRecord *theEvent, UInt32 sleep, RgnHandle mouseRgn) {
@@ -49,7 +52,7 @@ char *GetFilePathName(vRefNum, fName)
   wLength = 0L;              /* Set path length to zip*/
   pathFileName = NewPtr(0L); /* Set null file's path  */
 
-  if (!PBHGetVInfo(&((HParamBlockRec)wVol),FALSE) &&/* Got vol info?    */
+  if (!PBHGetVInfo(&wVol,FALSE) &&/* Got vol info?    */
    pathFileName) {           /* Got file path pointer?*/
    if (wVol.ioVSigWord == 0x4244) {/* Check if it HFS */
     wCInfo.ioNamePtr = (StringPtr)&wName;/* Init it   */
@@ -61,7 +64,7 @@ char *GetFilePathName(vRefNum, fName)
     while (wCInfo.ioDrParID != 1){/* Do full path     */
      wCInfo.ioDrDirID = wCInfo.ioDrParID;/*Move up dir*/
 
-     if (PBGetCatInfo(&(CInfoPBRec)wCInfo,FALSE))/* Get dir info  */
+      if (PBGetCatInfo(&wCInfo,FALSE))/* Get dir info  */
       break;                 /* Break-out if failed!! */
 
      wLength += wName[0] + 1L;/* Set string length    */
@@ -158,7 +161,7 @@ int GetFilePathVolRef(pathFileName)
     if (!wVol.ioVRefNum) {   /* Check if need vol ref */
      wVol.ioNamePtr = (StringPtr)(&wVolName);
 
-     for(wVol.ioVolIndex = 1; !PBHGetVInfo(&(HParamBlockRec)wVol,FALSE);
+     for(wVol.ioVolIndex = 1; !PBHGetVInfo(&wVol,FALSE);
       wVol.ioVolIndex++) {
       if (EqualString(wName,wVolName,FALSE,FALSE))
        break;
@@ -174,7 +177,7 @@ int GetFilePathVolRef(pathFileName)
      wCInfo.ioFDirIndex = 0;
      wCInfo.ioDrParID = wCInfo.ioDrDirID;
 
-     if (PBGetCatInfo(&(CInfoPBRec)wCInfo,FALSE))/* Check dir ?   */
+     if (PBGetCatInfo(&wCInfo,FALSE))/* Check dir ?   */
       return(0);             /* Nope, break-out!!!    */
     }
    }                         /* Add to directory specs*/
@@ -186,7 +189,7 @@ int GetFilePathVolRef(pathFileName)
   wDir.ioWDProcID = 'ERIK';  /* Magic 'SFGetFile' ID #*/
   wDir.ioWDDirID = wCInfo.ioDrDirID;
 
-  if (!PBOpenWD(&(WDPBRec)wDir,FALSE))/* Check if opened dir   */
+  if (!PBOpenWD(&wDir,FALSE))/* Check if opened dir   */
    vRefNum = wDir.ioVRefNum; /* Return vol/dir ref #  */
 
   return(vRefNum);           /* Return vol/dir ref #  */

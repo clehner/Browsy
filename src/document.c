@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <Memory.h>
 #include "document.h"
@@ -35,6 +36,6 @@ void DisposeDOMDocument(DOMDocument *doc) {
 }
 
 void DOMDocumentParseAppend(DOMDocument *doc, Ptr data, long bytes) {
-	tokenize(doc->tokenizer);
+	//tokenize(doc->tokenizer);
 
 }

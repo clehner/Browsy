@@ -1,6 +1,10 @@
 #ifndef _TOKENIZER_H
 #define _TOKENIZER_H
 
+#ifndef EOF
+#define EOF -1
+#endif
+
 typedef enum {
 	DATA_STATE,
 	CHARACTER_REFERENCE_IN_DATA_STATE,

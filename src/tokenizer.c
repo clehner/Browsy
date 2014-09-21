@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <Memory.h>
@@ -504,6 +504,7 @@ void tokenize(Tokenizer *tokenizer) {
 				RECONSUME(input);
 			}
 		break;
+		/*
 		case SCRIPT_DATA_LESS_THAN_SIGN_STATE:
 			switch(input) {
 			case '':
@@ -1020,6 +1021,10 @@ void tokenize(Tokenizer *tokenizer) {
 				break;
 			}
 		break;
+		*/
+		default:
+			// State not yet implemented
+			return;
 		}
 	}
 }
