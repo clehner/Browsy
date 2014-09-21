@@ -905,17 +905,6 @@ void PageWindowSaveAs(PageWindow *pWin) {
 	FSClose(refNum);
 }
 
-void ErrorAlert(char *text) {
-	Str255 errStr;
-	short len = strlen(text);
-	strncpy(errStr+1, text, len);
-	//BlockMove(text, errStr+1, len);
-	errStr[0] = len;
-
-	ParamText(errStr, "\p", "\p", "\p");
-	StopAlert(129, NULL);
-}
-
 void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "http://192.168.1.128/stuff/election/2011candidates.html";
 	char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";

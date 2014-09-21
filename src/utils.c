@@ -334,3 +334,14 @@ void CtoP(char *cstr, unsigned char *pstr) {
 	strncpy(pstr+1, cstr, len);
 	pstr[0] = len;
 }
+
+void ErrorAlert(char *text) {
+	Str255 errStr;
+	short len = strlen(text);
+	strncpy(errStr+1, text, len);
+	//BlockMove(text, errStr+1, len);
+	errStr[0] = len;
+
+	ParamText(errStr, "\p", "\p", "\p");
+	StopAlert(129, NULL);
+}
