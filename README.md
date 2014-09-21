@@ -7,7 +7,7 @@ A browser for System 6.
 Currently this is mostly a UI concept, that can read local text files, manage
 history, and allow the user to push buttons.
 
-Build using MPW.
+Build using [Retro68](https://github.com/autc04/Retro68/).
 
 ## TODO
 

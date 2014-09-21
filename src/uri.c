@@ -1,4 +1,10 @@
+
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <Memory.h>
 #include <MacWindows.h>
 #include <TextEdit.h>
@@ -6,6 +12,7 @@
 #include "Browsy.h"
 #include "uri.h"
 #include "utils.h"
+#include "window.h"
 
 char *GuessContentType(char *path) {
 	char *extension = strrchr(path, '.');

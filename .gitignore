@@ -1,2 +1,5 @@
 Browsy
-Browsy.NJ
+Browsy.bin
+*.o
+*.i
+*.d

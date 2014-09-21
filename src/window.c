@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include <MacWindows.h>
 #include <Memory.h>
 #include <TextEdit.h>
@@ -13,15 +15,15 @@
 #include "uri.h"
 #include "document.h"
 
-const short toolbarHeight = 28;
-const short statusBarHeight = 15;
-const short defaultWindow = 128;
-const short handCursor = 128;
-const short toolbarButtonsWidth = 84;
-const short navBtn = 1;
-const short toolbarIconsSICN = 128;
-const short toolbarIconsDisabledSICN = 129;
-const short navMenuPopupIds = 1000;
+#define toolbarHeight 28
+#define statusBarHeight 15
+#define defaultWindow 128
+#define handCursor 128
+#define toolbarButtonsWidth 84
+#define navBtn 1
+#define toolbarIconsSICN 128
+#define toolbarIconsDisabledSICN 129
+#define navMenuPopupIds 1000
 enum {iconBack, iconForward, iconHome, iconStop};
 
 /*static Rect toolbarRects[] = {toolbarRectBack, toolbarRectForward,
