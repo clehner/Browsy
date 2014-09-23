@@ -1,5 +1,9 @@
-Browsy
-Browsy.bin
+*.bin
+*.dsk
+*.68k
+*.gdb
 *.o
 *.i
 *.d
+rsrc-args
+rsrc/*/*.dat
