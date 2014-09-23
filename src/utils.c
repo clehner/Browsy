@@ -34,6 +34,10 @@ char *GetFilePathName(vRefNum, fName)
   char         *pathFileName;/* Working file path name*/
   short i;
 
+  // simplify union type casting
+  HParamBlockRec wVolRec = {.volumeParam=wVol};
+  CInfoPBRec wCInfoRec = {.dirInfo = wCInfo};
+
   wDir.ioNamePtr = 0L;       /* Init working directory*/
   wDir.ioVRefNum = vRefNum;
   wDir.ioWDIndex = 0;
@@ -52,7 +56,7 @@ char *GetFilePathName(vRefNum, fName)
   wLength = 0L;              /* Set path length to zip*/
   pathFileName = NewPtr(0L); /* Set null file's path  */
 
-  if (!PBHGetVInfo(&wVol,FALSE) &&/* Got vol info?    */
+   if (!PBHGetVInfo(&wVolRec,FALSE) &&/* Got vol info?    */
    pathFileName) {           /* Got file path pointer?*/
    if (wVol.ioVSigWord == 0x4244) {/* Check if it HFS */
     wCInfo.ioNamePtr = (StringPtr)&wName;/* Init it   */
@@ -64,7 +68,7 @@ char *GetFilePathName(vRefNum, fName)
     while (wCInfo.ioDrParID != 1){/* Do full path     */
      wCInfo.ioDrDirID = wCInfo.ioDrParID;/*Move up dir*/
 
-      if (PBGetCatInfo(&wCInfo,FALSE))/* Get dir info  */
+     if (PBGetCatInfo(&wCInfoRec,FALSE))/* Get dir info  */
       break;                 /* Break-out if failed!! */
 
      wLength += wName[0] + 1L;/* Set string length    */
@@ -125,7 +129,7 @@ int GetFilePathVolRef(pathFileName)
   short        i;            /* Working index         */
   char         c;            /* Working input char    */
   int        vRefNum;      /* Working vol/dir ref   */
-  WDParam      wDir;         /* Working directory     */
+  WDPBRec      wDir;         /* Working directory     */
   HVolumeParam wVol;         /* Working HFS param blk */
   DirInfo      wCInfo;       /* Working cat info block*/
   //long         wDirID;       /* Working directory ID  */
@@ -133,6 +137,10 @@ int GetFilePathVolRef(pathFileName)
   Str255       wName;        /* Working string name   */
   //char         *wPtr;        /* Working string pointer*/
   short        wLength;      /* Working string length */
+
+  // simplify union type casting
+  HParamBlockRec wVolRec = {.volumeParam=wVol};
+  CInfoPBRec wCInfoRec = {.dirInfo = wCInfo};
 
   vRefNum = 0;               /* Invalid vol/dir ref # */
 
@@ -161,7 +169,7 @@ int GetFilePathVolRef(pathFileName)
     if (!wVol.ioVRefNum) {   /* Check if need vol ref */
      wVol.ioNamePtr = (StringPtr)(&wVolName);
 
-     for(wVol.ioVolIndex = 1; !PBHGetVInfo(&wVol,FALSE);
+     for(wVol.ioVolIndex = 1; !PBHGetVInfo(&wVolRec,FALSE);
       wVol.ioVolIndex++) {
       if (EqualString(wName,wVolName,FALSE,FALSE))
        break;
@@ -177,7 +185,7 @@ int GetFilePathVolRef(pathFileName)
      wCInfo.ioFDirIndex = 0;
      wCInfo.ioDrParID = wCInfo.ioDrDirID;
 
-     if (PBGetCatInfo(&wCInfo,FALSE))/* Check dir ?   */
+     if (PBGetCatInfo(&wCInfoRec,FALSE))/* Check dir ?   */
       return(0);             /* Nope, break-out!!!    */
     }
    }                         /* Add to directory specs*/
