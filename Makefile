@@ -15,12 +15,14 @@ CFLAGS += -Wno-multichar -Wno-attributes -Werror
 LDFLAGS = -lretrocrt -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite
 
 RSRC_HEX=$(wildcard rsrc/*/*.hex)
-RSRC_DAT=$(RSRC_HEX:.hex=.dat)
+RSRC_TXT=$(wildcard rsrc/*/*.txt)
+RSRC_DAT=$(RSRC_HEX:.hex=.dat) $(RSRC_TXT:.txt=.dat)
 
 ifndef V
 	QUIET_CC   = @echo ' CC   ' $<;
 	QUIET_LINK = @echo ' LINK ' $@;
 	QUIET_APPL = @echo ' APPL ' $@;
+	QUIET_RSRC = @echo ' RSRC ' $@;
 endif
 
 all: $(BIN).bin
@@ -39,10 +41,13 @@ $(BIN).68k: $(OBJ)
 rsrc: $(RSRC_DAT) rsrc-args
 
 rsrc/%.dat: rsrc/%.hex
-	$(FROM_HEX) $< > $@
+	$(QUIET_RSRC)$(FROM_HEX) $< > $@
+
+rsrc/TEXT/%.dat: rsrc/TEXT/%.txt
+	$(QUIET_RSRC)tr '\n' '\r' < $< > $@
 
 rsrc-args: $(RSRC_DAT)
-	@cd rsrc && for code in *; do \
+	@cd rsrc && for code in $$(ls); do \
 		echo -n "-t $$code "; \
 		cd "$$code" && for file in *.dat; do \
 			echo -n "-r $${file%.dat} rsrc/$$code/$$file "; \
