@@ -637,12 +637,15 @@ void PageWindowNavigate(PageWindow *pWin, char *location) {
 	InvalRect(&(*pWin->addressBarTE)->viewRect);
 
 	// don't put a new history item for the same address
-	if (strncmp(newLocation, pWin->history->address, len+1) != 0) {
+	if (!pWin->history ||
+			strncmp(newLocation, pWin->history->address, len+1) != 0) {
 		historyItem = HistoryItemNewNext(pWin->history);
-		historyItem->address = newLocation;
-		//historyItem->title = "Title";
-		pWin->history = historyItem;
-		//PageWindowSetStatus(pWin, pWin->location);
+		if (historyItem) {
+			historyItem->address = newLocation;
+			//historyItem->title = "Title";
+			pWin->history = historyItem;
+			//PageWindowSetStatus(pWin, pWin->location);
+		}
 	}
 
 	// redraw buttons
