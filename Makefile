@@ -27,6 +27,7 @@ ifndef V
 	QUIET_LINK = @echo ' LINK ' $@;
 	QUIET_APPL = @echo ' APPL ' $@;
 	QUIET_RSRC = @echo ' RSRC ' $@;
+	QUIET_RUN = @echo ' RUN  ' $<;
 endif
 
 all: $(BIN).bin
@@ -62,8 +63,8 @@ rsrc-args: $(RSRC_DAT)
 wc:
 	@wc -l $(SRC) $(INC) | sort -n
 
-run: all
-	$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
+run: $(BIN).dsk
+	$(QUIET_RUN)$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
 
 clean:
 	rm -f $(BIN) $(BIN).dsk $(BIN).bin $(BIN).68k $(BIN).68k.gdb \
