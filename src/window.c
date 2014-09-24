@@ -41,7 +41,6 @@ void Scroll(PageWindow *pWin, int h, int v);
 //void PageWindowAdjustScrollBars(PageWindow *pWin);
 void FrameAddressBar(PageWindow *pWin);
 void PageWindowDrawGrowIcon(PageWindow *pWin);
-void ErrorAlert(char *text);
 HistoryItem *HistoryItemNewNext(HistoryItem *base);
 void DrawToolbarButtons(PageWindow *pWin);
 void HandleNavButtonClick(PageWindow *pWin, Point where);

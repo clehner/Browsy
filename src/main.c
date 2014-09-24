@@ -7,6 +7,7 @@
 #include <AppleEvents.h>
 #include "Browsy.h"
 #include "window.h"
+#include "menus.h"
 #include "utils.h"
 
 void Initialize();

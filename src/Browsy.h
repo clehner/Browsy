@@ -14,4 +14,6 @@ typedef struct HistoryItem {
 	struct HistoryItem *next;
 } HistoryItem;
 
+void Terminate();
+
 #endif

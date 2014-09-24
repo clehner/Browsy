@@ -1,3 +1,6 @@
+#ifndef _URI_H
+#define _URI_H
+
 typedef enum {
 	stateResolving,
 	stateConnecting,
@@ -47,3 +50,5 @@ void DisposeResponse(URIResponse *resp);
 void DisposeHeaders(HTTPHeader *header);
 void DisposeRequest(URIRequest *req);
 void RequestURI(char *uri, void (*callback)(URIRequest *req), void *refCon);
+
+#endif

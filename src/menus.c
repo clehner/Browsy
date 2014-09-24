@@ -9,6 +9,7 @@
 #include <Scrap.h>
 #include "Browsy.h"
 #include "window.h"
+#include "menus.h"
 
 static void ShowAbout();
 
