@@ -131,8 +131,8 @@ void HandleMenu(long menuAction) {
 					if (te && !inPage) {
 						TECut(te);
 						if (!inPage) {
-							ZeroScrap();
-							TEToScrap();
+							//ZeroScrap();
+							//TEToScrap();
 						}
 					} else {
 						SysBeep(5);
@@ -142,15 +142,15 @@ void HandleMenu(long menuAction) {
 					if (te) {
 						TECopy(te);
 						if (!inPage) {
-							ZeroScrap();
-							TEToScrap();
+							//ZeroScrap();
+							//TEToScrap();
 						}
 					}
 					break;
 				case editPasteItem:
 					if (te && !inPage) {
-						TEFromScrap();
-						TEPaste(te);
+						//TEFromScrap();
+						//TEPaste(te);
 					} else {
 						SysBeep(5);
 					}

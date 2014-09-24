@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
+#include <ctype.h>
 #include <StandardFile.h>
 #include <StringCompare.h>
 #include "Browsy.h"
@@ -15,6 +17,11 @@ Boolean WNE(EventMask eventMask, EventRecord *theEvent, UInt32 sleep, RgnHandle 
 		SystemTask();
 		return GetNextEvent(eventMask, theEvent);
 	}
+}
+
+// check equality of pascal strings (case insensitive)
+Boolean EqualPStringCase(ConstStr255Param str1, ConstStr255Param str2) {
+    return !strncasecmp(str1, str2, str1[0]+1);
 }
 
 // GetFilePathName and GetFilePathVolRef are from MacTech:
@@ -171,7 +178,7 @@ int GetFilePathVolRef(pathFileName)
 
      for(wVol.ioVolIndex = 1; !PBHGetVInfo(&wVolRec,FALSE);
       wVol.ioVolIndex++) {
-      if (EqualString(wName,wVolName,FALSE,FALSE))
+      if (EqualPStringCase(wName,wVolName))
        break;
       }
 
@@ -318,7 +325,7 @@ void PlotSICN(Rect *theRect, SICNHand theSICN, long theIndex/*, short srcMode*/)
 	//if (!srcMode) srcMode = srcCopy;
 
 	/* check the index for a valid value */
-	if ((GetHandleSize((Handle)theSICN) / sizeof(SICN)) > theIndex) {
+	if ((InlineGetHandleSize((Handle)theSICN) / sizeof(SICN)) > theIndex) {
 
 		/* store the resource's current locked/unlocked condition */
 		state = HGetState((Handle)theSICN);

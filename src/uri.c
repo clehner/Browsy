@@ -122,6 +122,8 @@ void RequestURI(
 		//ParamText("\pVolume Ref Num:", vRefNum, "\p", "\p");
 		//StopAlert(129, NULL);
 
+		ErrorAlert("Files not currently supported.");
+		/*
 		if (FSOpen(fName, vRefNum, &refNum) != noErr) {
 			//sprintf(blah, "Unable to read file. err: %d", err);
 			//ErrorAlert(blah);
@@ -150,6 +152,7 @@ void RequestURI(
 		if (refNum) FSClose(refNum);
 		//if (fileContents) DisposeHandle(fileContents);
 		free(filePath);
+		*/
 
 	} else if (strcmp(scheme, "http")==0) {
 		Handle errorText = NewHandle(25);
@@ -176,7 +179,9 @@ void RequestURI(
 			resp->length = 0;
 		} else {
 			resp->contentHandle = text;
-			resp->length = GetHandleSize(text);
+			resp->length = 10;
+			// TODO: implement GetHandleSize in libretro
+			//resp->length = GetHandleSize(text);
 		}
 		resp->contentType = "text/plain";
 		req->state = stateComplete;

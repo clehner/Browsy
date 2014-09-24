@@ -10,7 +10,7 @@ INC     = $(wildcard src/*.h)
 OBJ     = $(SRC:.c=.o)
 DEP     = $(SRC:.c=.d)
 CFLAGS  = -MMD
-CFLAGS += -O3 -DNDEBUG
+CFLAGS += -O3 -DNDEBUG -std=c11
 CFLAGS += -Wno-multichar -Wno-attributes -Werror
 LDFLAGS = -lretrocrt -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite
 

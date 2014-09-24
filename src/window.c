@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <MacWindows.h>
 #include <Memory.h>
 #include <TextEdit.h>
@@ -704,7 +705,7 @@ void PageWindowKeyDown(PageWindow *pWin, char theChar) {
 	char *location;
 	if (pWin->focusTE == pWin->contentTE) {
 	} else if (pWin->focusTE == pWin->addressBarTE) {
-		if (theChar == '\n') {
+		if (theChar == '\r') {
 			if ((*pWin->addressBarTE)->teLength == 0 && pWin->history) {
 				// Put back current address
 				location = pWin->history->address;
@@ -722,7 +723,7 @@ void PageWindowKeyDown(PageWindow *pWin, char theChar) {
 			//FrameAddressBar(pWin);
 		}
 	} else if (pWin->focusTE) {
-		if (theChar == '\n') {
+		if (theChar == '\r') {
 			// todo: find and submit form
 		} else {
 			TEKey(theChar, pWin->focusTE);
@@ -848,6 +849,11 @@ void PageWindowSaveAs(PageWindow *pWin) {
 	where.v >>= 2;
 
 	//GetFilename(pWin, fileName);
+	ParamText("\pNot yet implemented.","\p","\p","\p");
+	StopAlert(129, NULL);
+	/*
+	 * needs FS* or SF* functions implemented in libretro
+	 * TODO: use lower-level functions
 
 	//BlockMove(pWin->location, loc+1, strlen(pWin->location));
 	//loc[0] = strlen(pWin->location)+1;
@@ -861,13 +867,7 @@ void PageWindowSaveAs(PageWindow *pWin) {
 		return;
 	}
 	//oe = SFPutOpen(reply.fName, reply.vRefNum, 'WWW6', 'TEXT', &refNum, NULL, NULL);
-	oe = Create(reply.fName, reply.vRefNum, 'WWW6', 'TEXT');
-	/*if (oe != noErr) {
-		ParamText("\pUnable to save file.","\p","\p","\p");
-		StopAlert(129, NULL);
-		//PageWindowSetStatus(pWin, errStr);
-		return;
-	}*/
+	//oe = Create(reply.fName, reply.vRefNum, 'WWW6', 'TEXT');
 	oe = FSOpen(reply.fName, reply.vRefNum, &refNum);
 	if (oe != noErr) {
 		ParamText("\pUnable to save file.","\p","\p","\p");
@@ -890,11 +890,13 @@ void PageWindowSaveAs(PageWindow *pWin) {
 		return;
 	}
 	FSClose(refNum);
+	*/
 }
 
 void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "http://192.168.1.128/stuff/election/2011candidates.html";
-	char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
+	//char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
+	char *home = "about:Browsy";
 
 	//"http://www.lehnerstudios.com/newsite/";
 	// GetPrefStr(prefHomePage, home);
@@ -940,6 +942,9 @@ void DebugSave(long bytes, Ptr buffer) {
 	where.h >>= 1;
 	where.v >>= 2;
 
+	ErrorAlert("Files not currently supported.");
+	/*
+
 	SFPutFile(where, "\pSave As...", "\pdebug", NULL, &reply);
 	if (!reply.good) {
 		return;
@@ -950,7 +955,7 @@ void DebugSave(long bytes, Ptr buffer) {
 		ParamText("\pUnable to save file.","\p","\p","\p");
 		StopAlert(129, NULL);
 		return;
-	}*/
+	}* /
 	oe = FSOpen(reply.fName, reply.vRefNum, &refNum);
 	if (oe != noErr) {
 		ParamText("\pUnable to save file.","\p","\p","\p");
@@ -970,6 +975,7 @@ void DebugSave(long bytes, Ptr buffer) {
 		return;
 	}
 	FSClose(refNum);
+	*/
 }
 
 void LoadingStarted(PageWindow *pWin) {

@@ -83,7 +83,7 @@ Boolean isAppropriateEndTagToken(TagToken *endTagToken);
 
 #define CASE_WHITESPACE \
 	case '\t': \
-	case '\012': \
+	case '\n': \
 	case '\r': \
 	case '\f': \
 	case ' ' \

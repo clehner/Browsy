@@ -60,8 +60,12 @@ void CheckEnvironment() {
 	Sys7 = sEnv.systemVersion >= 0x0700;
 	HasColorQD = sEnv.hasColorQD;
 
+	HasWNE = true;
+	/*
+	 * disabled until implemented in libretro
 	HasWNE = (NGetTrapAddress(_WaitNextEvent, ToolTrap) !=
 			  NGetTrapAddress(_Unimplemented, ToolTrap));
+			  */
 }
 
 void MainLoop() {
