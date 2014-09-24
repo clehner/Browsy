@@ -18,6 +18,10 @@ RSRC_HEX=$(wildcard rsrc/*/*.hex)
 RSRC_TXT=$(wildcard rsrc/*/*.txt)
 RSRC_DAT=$(RSRC_HEX:.hex=.dat) $(RSRC_TXT:.txt=.dat)
 
+MINI_VMAC_DIR=~/Mac/Emulation/Mini\ vMac
+MINI_VMAC=$(MINI_VMAC_DIR)/Mini\ vMac
+MINI_VMAC_LAUNCHER_DISK=$(MINI_VMAC_DIR)/launcher-sys.dsk
+
 ifndef V
 	QUIET_CC   = @echo ' CC   ' $<;
 	QUIET_LINK = @echo ' LINK ' $@;
@@ -58,8 +62,11 @@ rsrc-args: $(RSRC_DAT)
 wc:
 	@wc -l $(SRC) $(INC) | sort -n
 
+run: all
+	$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
+
 clean:
 	rm -f $(BIN) $(BIN).dsk $(BIN).bin $(BIN).68k $(BIN).68k.gdb \
 		$(OBJ) $(DEP) $(RSRC_DAT) rsrc-args linkmap.txt
 
-.PHONY: clean wc
+.PHONY: clean wc run
