@@ -3,16 +3,20 @@ TOOLCHAIN = /opt/Retro68-build/toolchain
 ARCH    = m68k-unknown-elf
 CC      = $(TOOLCHAIN)/bin/$(ARCH)-gcc
 LD      = $(TOOLCHAIN)/bin/$(ARCH)-g++
+AS      = $(TOOLCHAIN)/bin/$(ARCH)-as
 MAKE_APPL = $(TOOLCHAIN)/bin/MakeAPPL
 FROM_HEX= xxd -r -ps
-SRC     = $(wildcard src/*.c)
+CSRC    = $(wildcard src/*.c)
+SSRC    = $(wildcard src/*.s)
 INC     = $(wildcard src/*.h)
+SRC     = $(CSRC) $(SSRC)
 OBJ     = $(SRC:.c=.o)
-DEP     = $(SRC:.c=.d)
+DEP     = $(CSRC:.c=.d)
 CFLAGS  = -MMD
 CFLAGS += -O3 -DNDEBUG -std=c11
 CFLAGS += -Wno-multichar -Wno-attributes -Werror
 LDFLAGS = -lretrocrt -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite
+SFLAGS  =
 
 RSRC_HEX=$(wildcard rsrc/*/*.hex)
 RSRC_TXT=$(wildcard rsrc/*/*.txt)
@@ -42,6 +46,9 @@ $(BIN).68k: $(OBJ)
 
 %.o: %.c
 	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.s
+	$(QUIET_AS)$(AS) $(SFLAGS) -o $@ $<
 
 rsrc: $(RSRC_DAT) rsrc-args
 

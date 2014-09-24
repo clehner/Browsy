@@ -11,8 +11,6 @@
 #include "window.h"
 #include "menus.h"
 
-static void ShowAbout();
-
 const short defaultMenubar = 128;
 const short aboutDialog = 128;
 
@@ -31,6 +29,10 @@ enum {
 	navigateBackItem=1, navigateForwardItem, navigateHomeItem,
 	navigateStopItem=5, navigateReloadItem
 };
+
+static void ShowAbout();
+
+extern Boolean aboutFilter(DialogPtr theDialog, EventRecord *theEvent, DialogItemIndex *itemHit);
 
 QDGlobals qd;
 
@@ -196,26 +198,26 @@ void HandleMenu(long menuAction) {
 	HiliteMenu(0);
 }
 
-// Browser6
-static pascal Boolean aboutFilter(
-	DialogPtr theDialog,
-	EventRecord *theEvent,
-	short *itemHit)
+Boolean aboutFilterReal(placeholder, itemHit, event, theDialog)
+	void *placeholder;
+	DialogItemIndex *itemHit;
+	EventRecord *event;
+	DialogPtr theDialog;
 {
-	if (theDialog)
-	{
-		switch (theEvent->what)
-		{
-		case mouseDown:
-			if (itemHit)
-			{
-				*itemHit=1;
-			}
-			return 1;
+	switch (event->what) {
+	case keyDown: {
+		char key = event->message & charCodeMask;
+		if (key == 'q' && event->modifiers & cmdKey) {
+			Terminate();
 		}
+		// fall-through
+	}
+	case mouseDown:
+		*itemHit = 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 
