@@ -14,6 +14,13 @@
 #include "utils.h"
 #include "window.h"
 
+struct {
+	char *name;
+	short id;
+} pageResources[] = {
+	{"about:Browsy", 128}
+};
+
 char *GuessContentType(char *path) {
 	char *extension = strrchr(path, '.');
 	if (!extension)
@@ -21,6 +28,16 @@ char *GuessContentType(char *path) {
 	if (!strcmp(extension, "html") || !strcmp(extension, "htm"))
 		return "text/html";
 	return "text/plain";
+}
+
+short getPageResourceId(char *uri) {
+	if (!uri) return 0;
+	for (int i = 0; i < SIZE(pageResources); i++) {
+		if (!strcmp(uri, pageResources[i].name)) {
+			return pageResources[i].id;
+		}
+	}
+	return 0;
 }
 
 URIResponse *NewResponse() {
@@ -148,10 +165,11 @@ void RequestURI(
 		callback(req);
 
 	} else if (strcmp(scheme, "about")==0) {
-		Handle text;
-		Str255 puri;
-		CtoP(uri, puri);
-		text = GetNamedResource('TEXT', puri);
+		Handle text = NULL;
+		short rsrcId = getPageResourceId(uri);
+		if (rsrcId) {
+			text = GetResource('TEXT', rsrcId);
+		}
 		resp = NewResponse();
 		if (text == NULL) {
 			resp->contentHandle = NULL;

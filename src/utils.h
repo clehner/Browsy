@@ -1,6 +1,8 @@
 #ifndef _UTILS_H
 #define _UTILs_H
 
+#define SIZE(array) (sizeof(array) / sizeof((array)[0]))
+
 typedef short SICN[16];
 typedef SICN **SICNHand;
 void PlotSICN(Rect *theRect, SICNHand theSICN, long theIndex);
