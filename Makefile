@@ -9,8 +9,7 @@ FROM_HEX= xxd -r -ps
 CSRC    = $(wildcard src/*.c)
 SSRC    = $(wildcard src/*.s)
 INC     = $(wildcard src/*.h)
-SRC     = $(CSRC) $(SSRC)
-OBJ     = $(SRC:.c=.o)
+OBJ     = $(CSRC:.c=.o) $(SSRC:.s=.o)
 DEP     = $(CSRC:.c=.d)
 CFLAGS  = -MMD
 CFLAGS += -O3 -DNDEBUG -std=c11
@@ -28,10 +27,11 @@ MINI_VMAC_LAUNCHER_DISK=$(MINI_VMAC_DIR)/launcher-sys.dsk
 
 ifndef V
 	QUIET_CC   = @echo ' CC   ' $<;
+	QUIET_AS   = @echo ' AS   ' $<;
 	QUIET_LINK = @echo ' LINK ' $@;
 	QUIET_APPL = @echo ' APPL ' $@;
 	QUIET_RSRC = @echo ' RSRC ' $@;
-	QUIET_RUN = @echo ' RUN  ' $<;
+	QUIET_RUN  = @echo ' RUN  ' $<;
 endif
 
 all: $(BIN).bin
@@ -68,7 +68,7 @@ rsrc-args: $(RSRC_DAT)
 	done > ../$@
 
 wc:
-	@wc -l $(SRC) $(INC) | sort -n
+	@wc -l $(CSRC) $(SSRC) $(INC) | sort -n
 
 run: $(BIN).dsk
 	$(QUIET_RUN)$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
