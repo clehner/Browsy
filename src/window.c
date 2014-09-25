@@ -7,6 +7,7 @@
 #include <StandardFile.h>
 #include <Menus.h>
 #include <Sound.h>
+#include <Fonts.h>
 #include <Resources.h>
 #include <ControlDefinitions.h>
 #include <Controls.h>
@@ -110,6 +111,7 @@ PageWindow* NewPageWindow() {
 	PageWindow* pWin = (PageWindow*) malloc(sizeof(PageWindow));
 	WindowPtr window = GetNewWindow(defaultWindow, nil, (WindowPtr)-1L);
 	TEHandle addressBarTE, contentTE, statusTE;
+	TEPtr te;
 	Rect destRect, viewRect, scrollRect, pr;
 	//ControlHandle vScrollBar;
 
@@ -144,8 +146,13 @@ PageWindow* NewPageWindow() {
 	destRect.right = viewRect.right = pr.right - 15;
 	contentTE = TEStyleNew(&destRect, &viewRect);
 	pWin->contentTE = contentTE;
-	//TESetText("meow", 4, contentTE);
 	//TEActivate(contentTE);
+	te = *contentTE;
+	te->txFont = kFontIDMonaco;
+	te->txFace = 0;
+	te->txSize = 9;
+	te->lineHeight = 12;
+	te->fontAscent = 9;
 
 	// Status bar TE
 	//destRect.left = viewRect.left = 2;
