@@ -4,8 +4,16 @@
 #include <ctype.h>
 #include <StandardFile.h>
 #include <StringCompare.h>
+#include <Traps.h>
 #include "Browsy.h"
 #include "utils.h"
+
+static Boolean HasWNE;
+
+void CheckWNE() {
+	HasWNE = (GetTrapAddress(_WaitNextEvent) !=
+			  GetTrapAddress(_Unimplemented));
+}
 
 // wait/get next event
 Boolean WNE(EventMask eventMask, EventRecord *theEvent, UInt32 sleep, RgnHandle mouseRgn) {

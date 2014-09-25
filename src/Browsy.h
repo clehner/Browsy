@@ -5,7 +5,6 @@
 
 Boolean HasColorQD;
 Boolean Sys7;
-Boolean HasWNE;
 
 typedef struct HistoryItem {
 	char *title;

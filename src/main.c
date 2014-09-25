@@ -3,7 +3,6 @@
 #include <Dialogs.h>
 #include <ToolUtils.h>
 #include <Sound.h>
-#include <Traps.h>
 #include <AppleEvents.h>
 #include "Browsy.h"
 #include "window.h"
@@ -59,9 +58,6 @@ void CheckEnvironment() {
 
 	Sys7 = sEnv.systemVersion >= 0x0700;
 	HasColorQD = sEnv.hasColorQD;
-
-	HasWNE = (GetTrapAddress(_WaitNextEvent) !=
-			  GetTrapAddress(_Unimplemented));
 }
 
 void MainLoop() {
