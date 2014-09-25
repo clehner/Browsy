@@ -221,7 +221,7 @@ void DrawToolbarButtons(PageWindow *pWin) {
 void UpdatePageWindow(PageWindow *pWin) {
 	WindowPtr win = pWin->window;
 	Rect pr = win->portRect;
-	Rect updateRect = ((*(win->visRgn))->rgnBBox);
+	Rect updateRect = (*win->visRgn)->rgnBBox;
 	SetPort(win);
 	//EraseRect(&updateRect);
 	PageWindowDrawGrowIcon(pWin);
@@ -679,8 +679,9 @@ void RecievePageData(URIRequest* req) {
 	PageWindowAdjustScrollBars(pWin);
 
 	TESetText(*(resp->contentHandle), resp->length, pWin->contentTE);
-	//TESetText(&asdf, sizeof asdf * sizeof(char), pWin->contentTE);
+
 	InvalRect(&(*pWin->contentTE)->viewRect);
+	EraseRect(&(*pWin->contentTE)->viewRect);
 	//TEUpdate(&(*pWin->contentTE)->viewRect, pWin->contentTE);
 }
 
