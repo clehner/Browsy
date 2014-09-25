@@ -60,11 +60,8 @@ void CheckEnvironment() {
 	Sys7 = sEnv.systemVersion >= 0x0700;
 	HasColorQD = sEnv.hasColorQD;
 
-	HasWNE = true;
-	/*
-	HasWNE = (NGetTrapAddress(_WaitNextEvent, ToolTrap) !=
-			  NGetTrapAddress(_Unimplemented, ToolTrap));
-			  */
+	HasWNE = (GetTrapAddress(_WaitNextEvent) !=
+			  GetTrapAddress(_Unimplemented));
 }
 
 void MainLoop() {
