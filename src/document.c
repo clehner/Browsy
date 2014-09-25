@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <Memory.h>
 #include "document.h"
 #include "window.h"
+#include "utils.h"
 #include "tokenizer.h"
 
 Node *NewNode() {

@@ -627,12 +627,10 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect) {
 }
 
 void PageWindowNavigate(PageWindow *pWin, char *location) {
-	short len = strlen(location)+1;
-	char *newLocation = (char *)malloc(sizeof(char)*len);
 	HistoryItem *historyItem;
+	char *newLocation = url_sanitize(location);
+	short len = strlen(newLocation);
 
-	newLocation = url_sanitize(location);
-	len = strlen(newLocation);
 	TESetText(newLocation, len, pWin->addressBarTE);
 	InvalRect(&(*pWin->addressBarTE)->viewRect);
 
@@ -671,13 +669,19 @@ void RecievePageData(URIRequest* req) {
 		// done loading
 		LoadingEnded(pWin);
 	}
+
+	/*
 	HLock(resp->contentHandle);
 	DOMDocumentParseAppend(pWin->document, *resp->contentHandle + resp->offset,
 		resp->length);
 	HUnlock(resp->contentHandle);
-	//PageWindowAdjustScrollBars(pWin);
-	//TESetText(*resp->contentHandle, resp->length, pWin->contentTE);
-	//InvalRect(&(*pWin->contentTE)->viewRect);
+	*/
+	PageWindowAdjustScrollBars(pWin);
+
+	TESetText(*(resp->contentHandle), resp->length, pWin->contentTE);
+	//TESetText(&asdf, sizeof asdf * sizeof(char), pWin->contentTE);
+	InvalRect(&(*pWin->contentTE)->viewRect);
+	//TEUpdate(&(*pWin->contentTE)->viewRect, pWin->contentTE);
 }
 
 // delete items after given item, and replace with new one.
@@ -706,18 +710,24 @@ HistoryItem *HistoryItemNewNext(HistoryItem *base) {
 
 void PageWindowKeyDown(PageWindow *pWin, char theChar) {
 	char *location;
+	TEPtr te;
+	if (!pWin->focusTE) return;
+	te = *pWin->focusTE;
+
 	if (pWin->focusTE == pWin->contentTE) {
 	} else if (pWin->focusTE == pWin->addressBarTE) {
-		if (theChar == '\r') {
-			if ((*pWin->addressBarTE)->teLength == 0 && pWin->history) {
+		if (theChar == '\r' || theChar == '\n') {
+			if (te->teLength == 0 && pWin->history) {
 				// Put back current address
 				location = pWin->history->address;
 				TESetText(location, strlen(location), pWin->addressBarTE);
-				InvalRect(&(*pWin->addressBarTE)->viewRect);
+				InvalRect(&te->viewRect);
 			} else {
-				location = (char *) malloc((*(pWin->addressBarTE))->teLength);
-				strcpy(location, *(TEGetText(pWin->addressBarTE)));
-				location[(*(pWin->addressBarTE))->teLength] = 0;
+				size_t len = te->teLength;
+				location = (char *) malloc((len + 1) * sizeof(char));
+				strncpy(location, *te->hText, len);
+				location[len] = '\0';
+
 				PageWindowNavigate(pWin, location);
 				free(location);
 			}
@@ -725,7 +735,7 @@ void PageWindowKeyDown(PageWindow *pWin, char theChar) {
 			TEKey(theChar, pWin->addressBarTE);
 			//FrameAddressBar(pWin);
 		}
-	} else if (pWin->focusTE) {
+	} else {
 		if (theChar == '\r') {
 			// todo: find and submit form
 		} else {

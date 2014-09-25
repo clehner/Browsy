@@ -18,7 +18,8 @@ struct {
 	char *name;
 	short id;
 } pageResources[] = {
-	{"about:Browsy", 128}
+	{"about:Browsy", 128},
+	{"about:blank", 129}
 };
 
 char *GuessContentType(char *path) {
@@ -179,9 +180,8 @@ void RequestURI(
 			resp->length = 0;
 		} else {
 			resp->contentHandle = text;
-			resp->length = 10;
-			// TODO: implement GetHandleSize in libretro
-			//resp->length = GetHandleSize(text);
+			//ReleaseResource(text);
+			resp->length = InlineGetHandleSize(text);
 		}
 		resp->contentType = "text/plain";
 		req->state = stateComplete;
@@ -189,13 +189,12 @@ void RequestURI(
 		callback(req);
 
 	} else {
-		Handle errorText = NewHandle(19);
-		strcpy(*errorText, "Unknown URI scheme.");
+		char errorText[] = "Unknown URI scheme.";
 		//char *path;
 		//PageWindowSetStatus(pWin, "http not yet implemented!");
 		resp = NewResponse();
-		resp->contentHandle = errorText;
-		resp->length = 19;
+		resp->contentHandle = (Handle)&errorText;
+		resp->length = sizeof(errorText);
 		resp->contentType = "text/plain";
 		req->state = stateComplete;
 		req->response = resp;
