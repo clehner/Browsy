@@ -37,7 +37,6 @@ Rect toolbarRectForward	= {5, 25, 21, 41};
 Rect toolbarRectHome	= {5, 45, 21, 61};
 Rect toolbarRectStop	= {5, 65, 21, 81};
 
-static pascal void ScrollAction(ControlHandle control, short part);
 void Scroll(PageWindow *pWin, int h, int v);
 //void PageWindowAdjustScrollBars(PageWindow *pWin);
 void FrameAddressBar(PageWindow *pWin);
@@ -50,6 +49,8 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect);
 void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
+
+static void ScrollAction(ControlHandle control, short part);
 
 void InitPageWindows() {
 	// left top right bottom
@@ -431,8 +432,7 @@ void PageWindowMouseDown(PageWindow *pWin, Point where, int modifiers) {
 	}
 }
 
-static pascal void ScrollAction(ControlHandle control, short part) {
-#pragma unused(part, pWin)
+static void ScrollAction(ControlHandle control, short part) {
 	WindowPtr win = (*control)->contrlOwner;
 	PageWindow *pWin = GetPageWindow(win);
 	short delta, page, ex;
@@ -452,9 +452,12 @@ static pascal void ScrollAction(ControlHandle control, short part) {
 		case kControlDownButtonPart:	delta = 16;		break;
 		case kControlPageUpPart:		delta = -page;	break;
 		case kControlPageDownPart:		delta = page;	break;
+		default:						delta = 0;
 	}
-	//SetCtlValue(control, (ex = GetCtlValue(control)) + delta);
+	//SetControlValue(control, GetControlValue(control)) + delta);
 	ex = (*control)->contrlValue;
+	/*
+	 * Not working currently
 	(*control)->contrlValue = ex + delta;
 	//if (ex -= GetCtlValue(control)) {
 	Draw1Control(control);
@@ -465,6 +468,7 @@ static pascal void ScrollAction(ControlHandle control, short part) {
 			Scroll(pWin, 0, ex);
 		//PageWindowUpdate(pWin);
 	}
+	*/
 }
 
 void Scroll(PageWindow *pWin, int h, int v) {

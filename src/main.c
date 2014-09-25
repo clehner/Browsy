@@ -62,7 +62,6 @@ void CheckEnvironment() {
 
 	HasWNE = true;
 	/*
-	 * disabled until implemented in libretro
 	HasWNE = (NGetTrapAddress(_WaitNextEvent, ToolTrap) !=
 			  NGetTrapAddress(_Unimplemented, ToolTrap));
 			  */

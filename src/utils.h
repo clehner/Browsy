@@ -2,6 +2,7 @@
 #define _UTILs_H
 
 #define SIZE(array) (sizeof(array) / sizeof((array)[0]))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 typedef short SICN[16];
 typedef SICN **SICNHand;
