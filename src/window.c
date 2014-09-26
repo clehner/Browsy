@@ -874,11 +874,10 @@ void PageWindowSaveAs(PageWindow *pWin) {
 	where.v >>= 2;
 
 	//GetFilename(pWin, fileName);
+	/*
 	ParamText("\pNot yet implemented.","\p","\p","\p");
 	StopAlert(129, NULL);
-	/*
-	 * needs FS* or SF* functions implemented in libretro
-	 * TODO: use lower-level functions
+	*/
 
 	//BlockMove(pWin->location, loc+1, strlen(pWin->location));
 	//loc[0] = strlen(pWin->location)+1;
@@ -891,8 +890,13 @@ void PageWindowSaveAs(PageWindow *pWin) {
 	if (!reply.good) {
 		return;
 	}
+
 	//oe = SFPutOpen(reply.fName, reply.vRefNum, 'WWW6', 'TEXT', &refNum, NULL, NULL);
-	//oe = Create(reply.fName, reply.vRefNum, 'WWW6', 'TEXT');
+	oe = Create(reply.fName, reply.vRefNum, 'WWW6', 'TEXT');
+	if (oe != noErr) {
+		alertf("Unable to create file. %u", oe);
+		return;
+	}
 	oe = FSOpen(reply.fName, reply.vRefNum, &refNum);
 	if (oe != noErr) {
 		ParamText("\pUnable to save file.","\p","\p","\p");
@@ -915,13 +919,14 @@ void PageWindowSaveAs(PageWindow *pWin) {
 		return;
 	}
 	FSClose(refNum);
-	*/
 }
 
 void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "http://192.168.1.128/stuff/election/2011candidates.html";
 	//char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
-	char *home = "about:Browsy";
+	//char *home = "about:Browsy";
+	//char *home = "file:///Untitled/Browsy";
+	char *home = "file:///Launcher/page.html";
 
 	//"http://www.lehnerstudios.com/newsite/";
 	// GetPrefStr(prefHomePage, home);

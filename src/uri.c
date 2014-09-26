@@ -109,26 +109,24 @@ void RequestURI(
 
 	if (strcmp(scheme, "file")==0) {
 		char *filePath = url_decode(path);
-		StringPtr fName = GetFilePathFileName(filePath);
-		int vRefNum = GetFilePathVolRef(filePath);
-		//OSErr err;
-		//char blah[48];
+		if (!filePath) {
+			ErrorAlert("Unable to decode URI");
+			return;
+		}
+		char *pathStart = filePath;
+		while (pathStart[0] == '/') pathStart++;
+		StringPtr fName = GetFilePathFileName(pathStart);
+		int vRefNum = GetFilePathVolRef(pathStart);
+		OSErr err;
+		char errbuf[128];
 		short refNum = 0;
 		long bytes;
 		Handle fileContents = NULL;
 
-		//sprintf(blah, "filePath: %s. fName: %s. vRefNum: %d.", filePath, fName, vRefNum);
-		//sprintf(blah, "filePath: %s. length: %d.", filePath, strlen(filePath));
-		//ErrorAlert(blah);
-		//ParamText("\pVolume Ref Num:", vRefNum, "\p", "\p");
-		//StopAlert(129, NULL);
-
-		ErrorAlert("Files not currently supported.");
-		/*
-		if (FSOpen(fName, vRefNum, &refNum) != noErr) {
-			//sprintf(blah, "Unable to read file. err: %d", err);
-			//ErrorAlert(blah);
-			ErrorAlert("Unable to read file");
+		if ((err = FSOpen(fName, vRefNum, &refNum)) != noErr) {
+			snprintf(errbuf, sizeof errbuf, "Unable to read file. err: %d", err);
+			ErrorAlert(errbuf);
+			//ErrorAlert("Unable to read file");
 		} else if (GetEOF(refNum, &bytes) != noErr) {
 			ErrorAlert("Unable to read file2"); //fName
 		} else if ((fileContents=NewHandle(bytes))==NULL) {
@@ -153,7 +151,6 @@ void RequestURI(
 		if (refNum) FSClose(refNum);
 		//if (fileContents) DisposeHandle(fileContents);
 		free(filePath);
-		*/
 
 	} else if (strcmp(scheme, "http")==0) {
 		Handle errorText = NewHandle(25);

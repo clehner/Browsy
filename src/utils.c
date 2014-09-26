@@ -49,10 +49,6 @@ char *GetFilePathName(vRefNum, fName)
   char         *pathFileName;/* Working file path name*/
   short i;
 
-  // simplify union type casting
-  HParamBlockRec wVolRec = {.volumeParam=wVol};
-  CInfoPBRec wCInfoRec = {.dirInfo = wCInfo};
-
   wDir.ioNamePtr = 0L;       /* Init working directory*/
   wDir.ioVRefNum = vRefNum;
   wDir.ioWDIndex = 0;
@@ -71,7 +67,7 @@ char *GetFilePathName(vRefNum, fName)
   wLength = 0L;              /* Set path length to zip*/
   pathFileName = NewPtr(0L); /* Set null file's path  */
 
-   if (!PBHGetVInfo(&wVolRec,FALSE) &&/* Got vol info?    */
+   if (!PBHGetVInfoSync((HParmBlkPtr)&wVol) &&/* Got vol info?    */
    pathFileName) {           /* Got file path pointer?*/
    if (wVol.ioVSigWord == 0x4244) {/* Check if it HFS */
     wCInfo.ioNamePtr = (StringPtr)&wName;/* Init it   */
@@ -83,7 +79,7 @@ char *GetFilePathName(vRefNum, fName)
     while (wCInfo.ioDrParID != 1){/* Do full path     */
      wCInfo.ioDrDirID = wCInfo.ioDrParID;/*Move up dir*/
 
-     if (PBGetCatInfo(&wCInfoRec,FALSE))/* Get dir info  */
+     if (PBGetCatInfo((CInfoPBPtr)&wCInfo,FALSE))/* Get dir info  */
       break;                 /* Break-out if failed!! */
 
      wLength += wName[0] + 1L;/* Set string length    */
@@ -154,22 +150,11 @@ int GetFilePathVolRef(pathFileName)
   short        wLength;      /* Working string length */
 
   // simplify union type casting
-  HParamBlockRec wVolRec = {.volumeParam=wVol};
-  CInfoPBRec wCInfoRec = {.dirInfo = wCInfo};
 
   vRefNum = 0;               /* Invalid vol/dir ref # */
 
   wVol.ioVRefNum = 0;        /* Init working vol ID # */
   wCInfo.ioDrDirID = 2;      /* Init top-most dir     */
-
-  // convert path from unix-style to mac-style
-  /*for (i=1; i<wLength; i++) {
-   if (pathFileName[i] == '/') {
-    pathFileName[i] = ':';
-   } else if (pathFileName[i] == ':') {
-    pathFileName[i] = '/';
-   }
-  }*/
 
   i = 0;                     /* Init working index    */
   wLength = 0;               /* Init string length    */
@@ -184,8 +169,9 @@ int GetFilePathVolRef(pathFileName)
     if (!wVol.ioVRefNum) {   /* Check if need vol ref */
      wVol.ioNamePtr = (StringPtr)(&wVolName);
 
-     for(wVol.ioVolIndex = 1; !PBHGetVInfo(&wVolRec,FALSE);
-      wVol.ioVolIndex++) {
+     for(wVol.ioVolIndex = 1;
+       !PBHGetVInfoSync((HParmBlkPtr)&wVol);
+       wVol.ioVolIndex++) {
       if (EqualPStringCase(wName,wVolName))
        break;
       }
@@ -200,7 +186,7 @@ int GetFilePathVolRef(pathFileName)
      wCInfo.ioFDirIndex = 0;
      wCInfo.ioDrParID = wCInfo.ioDrDirID;
 
-     if (PBGetCatInfo(&wCInfoRec,FALSE))/* Check dir ?   */
+     if (PBGetCatInfo((CInfoPBPtr)&wCInfo,FALSE))/* Check dir ?   */
       return(0);             /* Nope, break-out!!!    */
     }
    }                         /* Add to directory specs*/
@@ -220,7 +206,7 @@ int GetFilePathVolRef(pathFileName)
 
 
 StringPtr GetFilePathFileName(pathFileName)
- char *pathFileName;         /* File's path string (pascal string)   */
+ char *pathFileName;         /* File's path string (C string)   */
  {
   short wLength = strlen(pathFileName); // pathFileName[0];
   //char *fName;
@@ -229,7 +215,7 @@ StringPtr GetFilePathFileName(pathFileName)
   short i;
   short lastSlash = 1;
 
-  for (i=1; i<wLength; i++) {
+  for (i=0; i<wLength; i++) {
    if (pathFileName[i] == '/') {
     lastSlash = i;
    }
@@ -238,7 +224,7 @@ StringPtr GetFilePathFileName(pathFileName)
   fName = (StringPtr) NewPtr(fLength + 1L);
   fName[0] = fLength-1;
   BlockMove(pathFileName + lastSlash + 1, fName + 1, fLength);
-  fName[fLength] = 0;
+  fName[fLength] = '\0';
   for (i=1; i<fLength; i++) {
    if (fName[i] == ':') {
     fName[i] = '/';
