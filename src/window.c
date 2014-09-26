@@ -823,32 +823,13 @@ void PageWindowOpenFile(PageWindow *pWin) {
 		}
 
 		pathName = GetFilePathName(reply.vRefNum, reply.fName);
-		len = strlen(pathName);
-		//sprintf(blah, "pathName (%u): %s", len, pathName);
-		//ErrorAlert(blah);
-		if (strlen(pathName) != len) {
-			ErrorAlert("Length of pathname changed. 1");
-			len = strlen(pathName);
-		}
-		pathName[len] = 0;
-		if (strlen(pathName) != len) {
-			ErrorAlert("Length of pathname changed. 2");
-			len = strlen(pathName);
-		}
-		//sprintf(blah, "pathName (%u)", strlen(pathName));
-		//ErrorAlert(blah);
-		//pathName[len] = 0;
 		encodedPathName = url_encode(pathName);
-		if (strlen(pathName) != len) {
-			ErrorAlert("Length of pathname changed. 3"); // 1
-			len = strlen(pathName);
+		if (!encodedPathName) {
+			alertf("Unable to convert file name");
+			DisposePtr(pathName);
+			return;
 		}
-		strcat(uri, encodedPathName);
-		if (strlen(pathName) != len) {
-			ErrorAlert("Length of pathname changed. 4");
-		}
-		//sprintf(blah, "pathName (%u): %s", strlen(pathName), pathName);
-		//ErrorAlert(blah);
+		strncat(uri, encodedPathName, sizeof uri);
 
 		free(encodedPathName);
 		DisposePtr(pathName);

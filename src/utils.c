@@ -118,7 +118,7 @@ char *GetFilePathName(vRefNum, fName)
 
   // append filename
   //strncpy(pathFileName + wLength, fName+1, fName[0]);
-  wPtr = NewPtr(wLength + fName[0]);
+  wPtr = NewPtr(wLength + fName[0] + 1);
   BlockMove(pathFileName, wPtr, wLength);
   DisposePtr(pathFileName);
   BlockMove(&fName[1], (pathFileName = wPtr) + wLength, (long)(fName[0]));
@@ -126,7 +126,7 @@ char *GetFilePathName(vRefNum, fName)
   pathFileName[wLength] = 0;
 
   // convert path to unix-style
-  for (i=1; i<wLength; i++) {
+  for (i=0; i<wLength; i++) {
    if (pathFileName[i] == '/') {
     pathFileName[i] = ':';
    } else if (pathFileName[i] == ':') {
@@ -254,6 +254,7 @@ char to_hex(char code) {
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_encode(char *str) {
   char *pstr = str, *buf = (char*)malloc(strlen(str) * 3 + 1), *pbuf = buf;
+  if (!buf) return NULL;
   while (*pstr) {
     if (isalnum(*pstr) ||
 	  *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' ||
