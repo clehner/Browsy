@@ -113,10 +113,14 @@ void RequestURI(
 			ErrorAlert("Unable to decode URI");
 			return;
 		}
+		// skip initial slashes
 		char *pathStart = filePath;
 		while (pathStart[0] == '/') pathStart++;
-		StringPtr fName = GetFilePathFileName(pathStart);
+		// get file name without leading directory components
+		StringPtr fName = CtoPCopy(getFilePathFileName(pathStart));
+		// get the volume
 		int vRefNum = GetFilePathVolRef(pathStart);
+
 		OSErr err;
 		char errbuf[128];
 		short refNum = 0;
@@ -157,6 +161,7 @@ void RequestURI(
 		if (refNum) FSClose(refNum);
 		//if (fileContents) DisposeHandle(fileContents);
 		free(filePath);
+		DisposePtr(fName);
 
 	} else if (strcmp(scheme, "http")==0) {
 		Handle errorText = NewHandle(25);

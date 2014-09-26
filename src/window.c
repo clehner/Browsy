@@ -865,9 +865,10 @@ void PageWindowSaveAs(PageWindow *pWin) {
 	//ParamText("\pLocation:",loc,"\p","\p");
 	//StopAlert(129, NULL);
 
-	fileName = GetFilePathFileName(pWin->location);
+	fileName = CtoPCopy(getFilePathFileName(pWin->location));
 	//PageWindowSetStatus(pWin, fileName);
 	SFPutFile(where, "\pSave As...", fileName, NULL, &reply);
+	DisposePtr(fileName);
 	if (!reply.good) {
 		return;
 	}

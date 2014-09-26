@@ -207,33 +207,12 @@ int GetFilePathVolRef(pathFileName)
  }
 
 
-StringPtr GetFilePathFileName(pathFileName)
- char *pathFileName;         /* File's path string (C string)   */
- {
-  short wLength = strlen(pathFileName); // pathFileName[0];
-  //char *fName;
-  StringPtr fName;
-  short fLength;
-  short i;
-  short lastSlash = 1;
-
-  for (i=0; i<wLength; i++) {
-   if (pathFileName[i] == '/') {
-    lastSlash = i;
-   }
-  }
-  fLength = wLength - lastSlash;
-  fName = (StringPtr) NewPtr(fLength + 1L);
-  fName[0] = fLength-1;
-  BlockMove(pathFileName + lastSlash + 1, fName + 1, fLength);
-  fName[fLength] = '\0';
-  for (i=1; i<fLength; i++) {
-   if (fName[i] == ':') {
-    fName[i] = '/';
-   }
-  }
-  return fName;
- }
+// Get the filename of the file in a path. (c strings)
+const char *getFilePathFileName(const char * pathFileName)
+{
+    const char *fName = strrchr(pathFileName, '/');
+    return fName ? fName + 1 : pathFileName;
+}
 
 // URL Encode/decode
 // from http://www.geekhideout.com/urlencode.shtml
@@ -348,6 +327,16 @@ void CtoP(char *cstr, unsigned char *pstr) {
 	short len = strlen(cstr);
 	strncpy(pstr+1, cstr, len);
 	pstr[0] = len;
+}
+
+// copy a c string to new pascal string, allocating memory for it
+StringPtr CtoPCopy(const char *cstr) {
+	short len = strlen(cstr);
+	StringPtr pstr = NewPtr(len + 1L);
+	if (!pstr) return NULL;
+	BlockMove(cstr, pstr+1, len);
+	pstr[0] = len;
+	return pstr;
 }
 
 void ErrorAlert(char *text) {
