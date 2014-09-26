@@ -123,6 +123,12 @@ void RequestURI(
 		long bytes;
 		Handle fileContents = NULL;
 
+		/*
+		alertf("[%d] %s vol: %d", fName[0], fName+1, vRefNum);
+		snprintf(errbuf, sizeof errbuf, "[%d] %s vol: %d", fName[0], fName+1, vRefNum);
+		ErrorAlert(errbuf);
+		*/
+
 		if ((err = FSOpen(fName, vRefNum, &refNum)) != noErr) {
 			snprintf(errbuf, sizeof errbuf, "Unable to read file. err: %d", err);
 			ErrorAlert(errbuf);

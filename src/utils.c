@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
@@ -355,5 +357,19 @@ void ErrorAlert(char *text) {
 	errStr[0] = len;
 
 	ParamText(errStr, "\p", "\p", "\p");
+	StopAlert(129, NULL);
+}
+
+void alertf(char *fmt, ...) {
+	va_list ap;
+	Str255 str;
+	size_t len;
+
+	va_start(ap, fmt);
+	len = vsnprintf(str+1, sizeof(str)-1, fmt, ap);
+	va_end(ap);
+	str[0] = len;
+
+	ParamText(str, "\p", "\p", "\p");
 	StopAlert(129, NULL);
 }

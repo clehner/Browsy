@@ -19,5 +19,6 @@ char *url_sanitize(char *str);
 //void PlotSICN(Rect *theRect, Handle theSICN, long theIndex);
 void CtoP(char *cstr, unsigned char *pstr);
 void ErrorAlert(char *text);
+void alertf(char *fmt, ...);
 
 #endif
