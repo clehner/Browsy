@@ -51,7 +51,7 @@ void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
 
-static void ScrollAction(ControlHandle control, short part);
+__attribute__((stdcall)) void ScrollAction(short part, ControlHandle control);
 
 void InitPageWindows() {
 	// left top right bottom
@@ -427,19 +427,20 @@ void PageWindowMouseDown(PageWindow *pWin, Point where, int modifiers) {
 							Scroll(pWin, delta, 0);
 						}
 					}
+					*/
 				}
 				break;
 			case kControlUpButtonPart:
 			case kControlDownButtonPart:
 			case kControlPageUpPart:
 			case kControlPageDownPart:
-				TrackControl(ch, where, ScrollAction);
+				TrackControl(ch, where, (void(*)(ControlHandle control, short part))ScrollAction);
 				break;
 		}
 	}
 }
 
-static void ScrollAction(ControlHandle control, short part) {
+__attribute__((stdcall)) void ScrollAction(short part, ControlHandle control) {
 	WindowPtr win = (*control)->contrlOwner;
 	PageWindow *pWin = GetPageWindow(win);
 	short delta, page, ex;
@@ -455,36 +456,25 @@ static void ScrollAction(ControlHandle control, short part) {
 		//: RoundDiv(r.bottom-r.top, win->vPitch))-1;
 	page = isH ? wr.right-wr.left : wr.bottom-wr.top;
 	switch(part) {
-		case kControlUpButtonPart:		delta = -16;	break;
-		case kControlDownButtonPart:	delta = 16;		break;
-		case kControlPageUpPart:		delta = -page;	break;
-		case kControlPageDownPart:		delta = page;	break;
+		case kControlUpButtonPart:		delta = 16;		break;
+		case kControlDownButtonPart:	delta = -16;	break;
+		case kControlPageUpPart:		delta = page;	break;
+		case kControlPageDownPart:		delta = -page;	break;
 		default:						delta = 0;
 	}
-	//SetControlValue(control, GetControlValue(control)) + delta);
-	ex = (*control)->contrlValue;
-	/*
-	 * Not working currently
-	(*control)->contrlValue = ex + delta;
-	//if (ex -= GetCtlValue(control)) {
-	Draw1Control(control);
-	if (ex -= (*control)->contrlValue) {
+	ex = GetControlValue(control) + delta;
+	SetControlValue(control, ex);
+	if (delta) {
 		if (isH)
-			Scroll(pWin, ex, 0);
+			Scroll(pWin, delta, 0);
 		else
-			Scroll(pWin, 0, ex);
+			Scroll(pWin, 0, delta);
 		//PageWindowUpdate(pWin);
 	}
-	*/
 }
 
 void Scroll(PageWindow *pWin, int h, int v) {
-	//RgnHandle updateRgn;
-	//updateRgn = NewRgn();
 	TEPinScroll(h, v, pWin->contentTE);
-	//ScrollRect(pWin->window->portRect, updateRgn);
-	//InvalRgn(updateRgn);
-	//DisposeRgn(updateRgn);
 }
 
 void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
