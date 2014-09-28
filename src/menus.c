@@ -32,8 +32,6 @@ enum {
 
 static void ShowAbout();
 
-extern Boolean aboutFilter(DialogPtr theDialog, EventRecord *theEvent, DialogItemIndex *itemHit);
-
 QDGlobals qd;
 
 void SetupMenus() {
@@ -198,12 +196,8 @@ void HandleMenu(long menuAction) {
 	HiliteMenu(0);
 }
 
-Boolean aboutFilterReal(placeholder, itemHit, event, theDialog)
-	void *placeholder;
-	DialogItemIndex *itemHit;
-	EventRecord *event;
-	DialogPtr theDialog;
-{
+pascal Boolean aboutFilter(DialogPtr dialog, EventRecord *event,
+		short *itemHit) {
 	switch (event->what) {
 	case keyDown: {
 		char key = event->message & charCodeMask;

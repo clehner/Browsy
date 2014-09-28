@@ -51,7 +51,7 @@ void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
 
-__attribute__((stdcall)) void ScrollAction(short part, ControlHandle control);
+pascal void ScrollAction(ControlHandle control, short part);
 
 void InitPageWindows() {
 	// left top right bottom
@@ -427,20 +427,19 @@ void PageWindowMouseDown(PageWindow *pWin, Point where, int modifiers) {
 							Scroll(pWin, delta, 0);
 						}
 					}
-					*/
 				}
 				break;
 			case kControlUpButtonPart:
 			case kControlDownButtonPart:
 			case kControlPageUpPart:
 			case kControlPageDownPart:
-				TrackControl(ch, where, (void(*)(ControlHandle control, short part))ScrollAction);
+				TrackControl(ch, where, ScrollAction);
 				break;
 		}
 	}
 }
 
-__attribute__((stdcall)) void ScrollAction(short part, ControlHandle control) {
+pascal void ScrollAction(ControlHandle control, short part) {
 	WindowPtr win = (*control)->contrlOwner;
 	PageWindow *pWin = GetPageWindow(win);
 	short delta, page, ex;
