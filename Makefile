@@ -11,6 +11,7 @@ SSRC    = $(wildcard src/*.s)
 INC     = $(wildcard src/*.h)
 OBJ     = $(CSRC:.c=.o) $(SSRC:.s=.o)
 DEP     = $(CSRC:.c=.d)
+SHAREDIR= Shared
 CFLAGS  = -MMD
 CFLAGS += -O3 -DNDEBUG -std=c11
 CFLAGS += -Wno-multichar -Wno-attributes -Werror
@@ -29,7 +30,7 @@ ifndef V
 	QUIET_CC   = @echo ' CC   ' $<;
 	QUIET_AS   = @echo ' AS   ' $<;
 	QUIET_LINK = @echo ' LINK ' $@;
-	QUIET_APPL = @echo ' APPL ' $@;
+	QUIET_APPL = @echo ' APPL ' $*;
 	QUIET_RSRC = @echo ' RSRC ' $@;
 	QUIET_RUN  = @echo ' RUN  ' $<;
 endif
@@ -41,8 +42,8 @@ all: $(BIN).bin
 $(BIN).68k: $(OBJ)
 	$(QUIET_LINK)$(LD) -o $@ $^ $(LDFLAGS)
 
-%.dsk %.bin: %.68k rsrc-args
-	$(QUIET_APPL)$(MAKE_APPL) -c $< -o $* $(shell cat rsrc-args)
+%.dsk %.bin %.APPL: %.68k rsrc-args
+	$(QUIET_APPL)$(MAKE_APPL) -c $< -o $* -C WWW6 $(shell cat rsrc-args)
 
 %.o: %.c
 	$(QUIET_CC)$(CC) $(CFLAGS) -c -o $@ $<
@@ -72,6 +73,16 @@ wc:
 
 run: $(BIN).dsk
 	$(QUIET_RUN)$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
+
+share: $(SHAREDIR)/$(BIN).APPL
+
+$(SHAREDIR)/$(BIN).APPL: $(BIN).APPL
+	cp $(BIN).APPL $(SHAREDIR)/
+	@cp .rsrc/$(BIN).APPL $(SHAREDIR)/.rsrc/
+	@cp .finf/$(BIN).APPL $(SHAREDIR)/.finf/
+
+run-basiliskii: share
+	ps aux | grep -v grep | grep BasiliskII -s || BasiliskII &
 
 clean:
 	rm -f $(BIN) $(BIN).dsk $(BIN).bin $(BIN).68k $(BIN).68k.gdb \
