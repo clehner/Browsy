@@ -897,7 +897,8 @@ void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
 	//char *home = "about:Browsy";
 	//char *home = "file:///Untitled/Browsy";
-	char *home = "file:///Launcher/page.html";
+	//char *home = "file:///Launcher/page.html";
+	char *home = "about:stuff";
 
 	//"http://www.lehnerstudios.com/newsite/";
 	// GetPrefStr(prefHomePage, home);

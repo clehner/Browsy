@@ -19,7 +19,8 @@ struct {
 	short id;
 } pageResources[] = {
 	{"about:Browsy", 128},
-	{"about:blank", 129}
+	{"about:blank", 129},
+	{"about:stuff", 130},
 };
 
 char *GuessContentType(char *path) {
