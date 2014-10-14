@@ -7,3 +7,5 @@
 *.d
 rsrc-args
 rsrc/*/*.dat
+dep
+lib

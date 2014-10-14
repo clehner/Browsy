@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -9,11 +8,18 @@
 #include <MacWindows.h>
 #include <TextEdit.h>
 #include <Resources.h>
+
+#include "http_parser.h"
+#include "stream.h"
+
 #include "Browsy.h"
 #include "uri.h"
 #include "utils.h"
 #include "window.h"
 
+#include "uri/about.h"
+
+/*
 struct {
 	char *name;
 	short id;
@@ -42,40 +48,12 @@ short getPageResourceId(char *uri) {
 	return 0;
 }
 
-URIResponse *NewResponse() {
-	return (URIResponse *)calloc(1, sizeof(URIResponse));
-	/*URIResponse *resp;
-	resp = (URIResponse *)malloc(sizeof(URIResponse));
-	memset(resp, 0, sizeof(URIResponse);
-	resp->headers = NULL;
-	resp->offset = 0;
-	resp->length = 0;
-	resp->contentHandle = NULL;
-	resp->contentType = NULL;
-	return resp;*/
-}
-
 void DisposeResponse(URIResponse *resp) {
 	if (resp->contentHandle) DisposeHandle(resp->contentHandle);
 	if (resp->contentType) free(resp->contentType);
 	DisposeHeaders(resp->headers);
 	free(resp);
 }
-
-void DisposeHeaders(HTTPHeader *header) {
-	if (!header) return;
-	free(header->name);
-	free(header->value);
-	DisposeHeaders(header->next);
-}
-
-void DisposeRequest(URIRequest *req) {
-	DisposeHeaders(req->headers);
-	if (req->data) DisposeHandle(req->data);
-	if (req->uri) free(req->uri);
-	if (req->response) DisposeResponse(req->response);
-	free(req);
-};
 
 void RequestURI(
 	char *uri,
@@ -127,12 +105,6 @@ void RequestURI(
 		short refNum = 0;
 		long bytes;
 		Handle fileContents = NULL;
-
-		/*
-		alertf("[%d] %s vol: %d", fName[0], fName+1, vRefNum);
-		snprintf(errbuf, sizeof errbuf, "[%d] %s vol: %d", fName[0], fName+1, vRefNum);
-		ErrorAlert(errbuf);
-		*/
 
 		if ((err = FSOpen(fName, vRefNum, &refNum)) != noErr) {
 			snprintf(errbuf, sizeof errbuf, "Unable to read file. err: %d", err);
@@ -211,3 +183,120 @@ void RequestURI(
 		//PageWindowSetStatus(pWin, "Unknown URI scheme.");
 	}
 }
+*/
+
+#define HTTP_SCHEME_PROVIDERS \
+X("about", aboutURIProvider) \
+X("file", aboutURIProvider) \
+X("http", aboutURIProvider)
+
+// URI object: a remote resource that may be requested and may respond
+struct URI {
+	URIConsumer *consumer;
+	void *consumerData;
+	URIProvider *provider;
+	void *providerData;
+};
+
+// create a new uri object
+URI *NewURI(char *uriStr)
+{
+	URIProvider *provider;
+	URI *uri;
+	
+	provider = URIGetProvider(uriStr);
+	if (!provider) return NULL;
+
+	uri = malloc(sizeof(URI));
+	if (!uri) return NULL;
+
+	URIProvide(uri, provider, uriStr);
+	return uri;
+}
+
+URIProvider *URIGetProvider(char *uri)
+{
+	short i;
+	struct URISchemeProvider *provider;
+
+#define X(scheme, provider) \
+	if (strncmp(uri, scheme, sizeof(scheme)-1) == 0 \
+			&& uri[sizeof(scheme)-1] == ':') { \
+		return provider; \
+	}
+HTTP_SCHEME_PROVIDERS
+
+	return NULL;
+
+	/*
+	struct http_parser_url u;
+	int result;
+	if ((result = http_parser_parse_url(uriStr, strlen(uriStr), 0, &u))) {
+	  alertf("Unable to parse URL %s: %d", uriStr, result);
+	  free(uri);
+	  return NULL;
+	}
+	*/
+}
+
+// set the uri consumer
+void URIConsume(URI *uri, URIConsumer *consumer, void *consumerData)
+{
+	uri->consumer = consumer;
+	uri->consumerData = consumerData;
+}
+
+// set the uri provider
+void URIProvide(URI *uri, URIProvider *provider, char *uriStr)
+{
+	uri->provider = provider;
+	uri->providerData = provider->init(uri, uriStr);
+}
+
+// request the URI, optionally sending along some data
+void URIRequest(URI *uri, char *method, Stream *postData)
+{
+	uri->provider->request(uri, &(HTTPMethod){httpOtherMethod, method},
+			postData);
+}
+
+// GET the URI
+void URIGet(URI *uri)
+{
+	uri->provider->request(uri, &(HTTPMethod){httpGET}, NULL);
+}
+
+// POST to the URI
+void URIPost(URI *uri, Stream *postData)
+{
+	uri->provider->request(uri, &(HTTPMethod){httpPOST}, NULL);
+}
+
+// forcibly close the uri request and response
+void URIClose(URI *uri)
+{
+	uri->provider->close(uri, uri->providerData);
+}
+
+// Provider methods:
+
+void URIGotStatus(URI *uri, short status)
+{
+	uri->consumer->on_status(uri->consumerData, status);
+}
+
+void URIGotHeader(URI *uri, struct HTTPHeader *header)
+{
+	uri->consumer->on_header(uri->consumerData, header);
+}
+
+void URIGotData(URI *uri, char *data, short len)
+{
+	uri->consumer->on_data(uri->consumerData, data, len);
+}
+
+void URIClosed(URI *uri, short error)
+{
+	uri->consumer->on_close(uri->consumerData, error);
+}
+

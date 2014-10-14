@@ -4,18 +4,24 @@ ARCH    = m68k-unknown-elf
 CC      = $(TOOLCHAIN)/bin/$(ARCH)-gcc
 LD      = $(TOOLCHAIN)/bin/$(ARCH)-g++
 AS      = $(TOOLCHAIN)/bin/$(ARCH)-as
+AR      = $(TOOLCHAIN)/bin/$(ARCH)-ar
 MAKE_APPL = $(TOOLCHAIN)/bin/MakeAPPL
 FROM_HEX= xxd -r -ps
-CSRC    = $(wildcard src/*.c)
-SSRC    = $(wildcard src/*.s)
-INC     = $(wildcard src/*.h)
-OBJ     = $(CSRC:.c=.o) $(SSRC:.s=.o)
-DEP     = $(CSRC:.c=.d)
+CSRC    = $(wildcard src/*.c src/**/*.c)
+INC     = $(wildcard src/*.h src/**/*.h)
+OBJ     = $(CSRC:.c=.o)
+CDEP    = $(CSRC:.c=.d)
 SHAREDIR= Shared
+DEP_DIR = dep
+LIB_DIR = lib
+DEPS    = http_parser cstreams
+LIBS    = $(DEPS:%=$(LIB_DIR)/lib%.a)
+LIBS_L  = $(DEPS:%=-l%)
 CFLAGS  = -MMD
 CFLAGS += -O3 -DNDEBUG -std=c11
 CFLAGS += -Wno-multichar -Wno-attributes -Werror
-LDFLAGS = -lretrocrt -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite
+CFLAGS += -Isrc -Idep/http-parser -Idep/c-streams/src
+LDFLAGS = -L$(LIB_DIR) -lretrocrt $(LIBS_L) -Wl,-elf2flt -Wl,-q -Wl,-Map=linkmap.txt -Wl,-undefined=consolewrite -Wl,-gc-sections
 SFLAGS  =
 
 RSRC_HEX=$(wildcard rsrc/*/*.hex)
@@ -35,11 +41,13 @@ ifndef V
 	QUIET_RUN  = @echo ' RUN  ' $<;
 endif
 
+# Main
+
 all: $(BIN).bin
 
--include $(DEP)
+-include $(CDEP)
 
-$(BIN).68k: $(OBJ)
+$(BIN).68k: $(OBJ) $(LIBS)
 	$(QUIET_LINK)$(LD) -o $@ $^ $(LDFLAGS)
 
 %.dsk %.bin %.APPL: %.68k rsrc-args
@@ -50,6 +58,8 @@ $(BIN).68k: $(OBJ)
 
 %.o: %.s
 	$(QUIET_AS)$(AS) $(SFLAGS) -o $@ $<
+
+# Resources
 
 rsrc: $(RSRC_DAT) rsrc-args
 
@@ -68,8 +78,33 @@ rsrc-args: $(RSRC_DAT)
 		cd ..; \
 	done > ../$@
 
-wc:
-	@wc -l $(CSRC) $(SSRC) $(INC) | sort -n
+# Dependencies
+
+deps: $(LIBS) $(LIB_DIR)
+
+$(LIB_DIR)/libhttp_parser.a: $(DEP_DIR)/http-parser/libhttp_parser.a $(LIB_DIR)
+	cp $< $@
+
+$(LIB_DIR)/libcstreams.a: $(DEP_DIR)/c-streams/libcstreams.a $(LIB_DIR)
+	cp $< $@
+
+$(DEP_DIR)/http-parser/libhttp_parser.a: $(DEP_DIR)/http-parser
+	cd $< && make package CC=$(CC) AR=$(AR)
+
+$(DEP_DIR)/c-streams/libcstreams.a: $(DEP_DIR)/c-streams
+	cd $< && make libcstreams.a
+
+$(DEP_DIR)/http-parser: $(DEP_DIR)
+	test -e $@ || git clone https://github.com/joyent/http-parser $@
+
+$(DEP_DIR)/c-streams: $(DEP_DIR)
+	@#git clone https://github.com/clehner/c-streams $@
+	test -e $@ || git clone ../c-streams $@
+
+$(DEP_DIR) $(LIB_DIR):
+	mkdir -p $@
+
+# Running
 
 run: $(BIN).dsk
 	$(QUIET_RUN)$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
@@ -84,8 +119,13 @@ $(SHAREDIR)/$(BIN).APPL: $(BIN).APPL
 run-basiliskii: share
 	ps aux | grep -v grep | grep BasiliskII -s || BasiliskII &
 
+# Misc
+
+wc:
+	@wc -l $(CSRC) $(INC) | sort -n
+
 clean:
 	rm -f $(BIN) $(BIN).dsk $(BIN).bin $(BIN).68k $(BIN).68k.gdb \
-		$(OBJ) $(DEP) $(RSRC_DAT) rsrc-args linkmap.txt
+		$(OBJ) $(CDEP) rsrc/*/*.dat rsrc-args linkmap.txt $(LIBS)
 
 .PHONY: clean wc run

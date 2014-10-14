@@ -45,13 +45,24 @@ void PageWindowDrawGrowIcon(PageWindow *pWin);
 HistoryItem *HistoryItemNewNext(HistoryItem *base);
 void DrawToolbarButtons(PageWindow *pWin);
 void HandleNavButtonClick(PageWindow *pWin, Point where);
-void RecievePageData(URIRequest* req);
 void PopupNavMenu(PageWindow *pWin, Rect *buttonRect);
 void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
 
 pascal void ScrollAction(ControlHandle control, short part);
+
+void PageURIOnStatus(void *obj, short httpStatus);
+void PageURIOnHeader(void *obj, struct HTTPHeader *header);
+void PageURIOnData(void *obj, char *data, short len);
+void PageURIOnClose(void *obj, short err);
+
+URIConsumer PageURIConsumer = {
+	.on_status = PageURIOnStatus,
+	.on_header = PageURIOnHeader,
+	.on_data = PageURIOnData,
+	.on_close = PageURIOnClose
+};
 
 void InitPageWindows() {
 	// left top right bottom
@@ -542,7 +553,7 @@ void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
 			PageWindowNavigateHistory(pWin, 1);
 		} else if (r == &toolbarRectHome) {
 			PageWindowNavigateHome(pWin);
-		} else if (r == &toolbarRectForward) {
+		} else if (r == &toolbarRectStop) {
 			//StopLoading(pWin);
 		} else {
 			ErrorAlert("Unknown button pressed.");
@@ -649,10 +660,16 @@ void PageWindowNavigate(PageWindow *pWin, char *location) {
 	// redraw buttons
 	InvalRect(&toolbarButtonsRect);
 
-	RequestURI(newLocation, RecievePageData, pWin);
-	//ErrorAlert("requesting uri.");
+	pWin->uri = NewURI(newLocation);
+	if (!pWin->uri) {
+		ErrorAlert("Unable to create URI request.");
+		return;
+	}
+	URIConsume(pWin->uri, &PageURIConsumer, pWin);
+	URIGet(pWin->uri);
 }
 
+/*
 void RecievePageData(URIRequest* req) {
 	PageWindow *pWin = (PageWindow *)req->refCon;
 	URIResponse *resp = req->response;
@@ -675,7 +692,7 @@ void RecievePageData(URIRequest* req) {
 	DOMDocumentParseAppend(pWin->document, *resp->contentHandle + resp->offset,
 		resp->length);
 	HUnlock(resp->contentHandle);
-	*/
+	* /
 	PageWindowAdjustScrollBars(pWin);
 
 	TESetText(*(resp->contentHandle), resp->length, pWin->contentTE);
@@ -684,6 +701,7 @@ void RecievePageData(URIRequest* req) {
 	EraseRect(&(*pWin->contentTE)->viewRect);
 	//TEUpdate(&(*pWin->contentTE)->viewRect, pWin->contentTE);
 }
+*/
 
 // delete items after given item, and replace with new one.
 HistoryItem *HistoryItemNewNext(HistoryItem *base) {
@@ -896,9 +914,9 @@ void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "http://192.168.1.128/stuff/election/2011candidates.html";
 	//char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
 	//char *home = "about:Browsy";
+	char *home = "about:stuff";
 	//char *home = "file:///Untitled/Browsy";
 	//char *home = "file:///Launcher/page.html";
-	char *home = "about:stuff";
 
 	//"http://www.lehnerstudios.com/newsite/";
 	// GetPrefStr(prefHomePage, home);
@@ -988,4 +1006,50 @@ void LoadingStarted(PageWindow *pWin) {
 void LoadingEnded(PageWindow *pWin) {
 	pWin->isLoading = false;
 	DrawToolbarButtons(pWin);
+}
+
+// URI consumer callbacks
+
+void PageURIOnStatus(void *obj, short httpStatus)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+	pWin->location = pWin->history->address;
+	LoadingStarted(pWin);
+	if (pWin->document) {
+		DisposeDOMDocument(pWin->document);
+	}
+	pWin->document = NewDOMDocument();
+}
+
+void PageURIOnHeader(void *obj, HTTPHeader *header)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+	switch (header->name) {
+		case httpContentType:
+			alertf("Got content type: %s", header->value);
+			break;
+		case httpContentLength:
+			alertf("Got content length: %s", header->value);
+			break;
+	}
+}
+
+void PageURIOnData(void *obj, char *data, short len)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+	//alertf("got data [%ld]: %s", len, data);
+	//DOMDocumentParseAppend(pWin->document, data, len);
+
+	//PageWindowAdjustScrollBars(pWin);
+
+	TEAppendText(data, len, pWin->contentTE);
+
+	InvalRect(&(*pWin->contentTE)->viewRect);
+	EraseRect(&(*pWin->contentTE)->viewRect);
+}
+
+void PageURIOnClose(void *obj, short err)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+	LoadingEnded(pWin);
 }

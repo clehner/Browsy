@@ -6,10 +6,12 @@
 #include <Controls.h>
 #include "document.h"
 #include "Browsy.h"
+#include "uri.h"
 
 typedef struct {
 	WindowPtr window;
 	char *location;
+	URI *uri; // resource request/response in progress
 	TEHandle addressBarTE;
 	TEHandle contentTE;
 	TEHandle focusTE; // whichever TE has focus

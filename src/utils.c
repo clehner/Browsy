@@ -363,3 +363,34 @@ void alertf(char *fmt, ...) {
 	ParamText(str, "\p", "\p", "\p");
 	StopAlert(129, NULL);
 }
+
+void TEAppendText(const void *text, long len, TEHandle hTE)
+{
+	char *start, *end;
+	long curLen, newLen;
+	short err;
+	TEPtr te = *hTE;
+	Handle hText = te->hText;
+
+	/*
+	err = PtrAndHand(text, (*hTE)->hText, len);
+	if (err) {
+		alertf("Error appending text: %u", err);
+	}
+	te->teLength += len;
+	return;
+	*/
+
+	curLen = te->teLength;
+	newLen = te->teLength + len;
+
+	if (InlineGetHandleSize(hText) < newLen) {
+		ReallocateHandle(hText, newLen);
+	}
+
+	HLock(hText);
+	BlockMove(text, *hText + curLen, len);
+	HUnlock(hText);
+
+	te->teLength = newLen;
+}

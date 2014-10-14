@@ -21,5 +21,6 @@ char *url_sanitize(char *str);
 void CtoP(char *cstr, unsigned char *pstr);
 void ErrorAlert(char *text);
 void alertf(char *fmt, ...);
+void TEAppendText(const void *text, long length, TEHandle hTE);
 
 #endif
