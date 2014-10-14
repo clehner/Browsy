@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <StandardFile.h>
 #include <StringCompare.h>
+#include <TextEdit.h>
 #include <Traps.h>
 #include "Browsy.h"
 #include "utils.h"

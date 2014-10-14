@@ -7,7 +7,6 @@
 #include <Memory.h>
 #include <MacWindows.h>
 #include <TextEdit.h>
-#include <Resources.h>
 
 #include "http_parser.h"
 #include "stream.h"
@@ -20,15 +19,6 @@
 #include "uri/about.h"
 
 /*
-struct {
-	char *name;
-	short id;
-} pageResources[] = {
-	{"about:Browsy", 128},
-	{"about:blank", 129},
-	{"about:stuff", 130},
-};
-
 char *GuessContentType(char *path) {
 	char *extension = strrchr(path, '.');
 	if (!extension)
@@ -36,16 +26,6 @@ char *GuessContentType(char *path) {
 	if (!strcmp(extension, "html") || !strcmp(extension, "htm"))
 		return "text/html";
 	return "text/plain";
-}
-
-short getPageResourceId(char *uri) {
-	if (!uri) return 0;
-	for (int i = 0; i < SIZE(pageResources); i++) {
-		if (!strcmp(uri, pageResources[i].name)) {
-			return pageResources[i].id;
-		}
-	}
-	return 0;
 }
 
 void DisposeResponse(URIResponse *resp) {
@@ -149,26 +129,6 @@ void RequestURI(
 		req->response = resp;
 		callback(req);
 
-	} else if (strcmp(scheme, "about")==0) {
-		Handle text = NULL;
-		short rsrcId = getPageResourceId(uri);
-		if (rsrcId) {
-			text = GetResource('TEXT', rsrcId);
-		}
-		resp = NewResponse();
-		if (text == NULL) {
-			resp->contentHandle = NULL;
-			resp->length = 0;
-		} else {
-			resp->contentHandle = text;
-			//ReleaseResource(text);
-			resp->length = InlineGetHandleSize(text);
-		}
-		resp->contentType = "text/plain";
-		req->state = stateComplete;
-		req->response = resp;
-		callback(req);
-
 	} else {
 		char errorText[] = "Unknown URI scheme.";
 		//char *path;
@@ -256,20 +216,20 @@ void URIProvide(URI *uri, URIProvider *provider, char *uriStr)
 // request the URI, optionally sending along some data
 void URIRequest(URI *uri, char *method, Stream *postData)
 {
-	uri->provider->request(uri, &(HTTPMethod){httpOtherMethod, method},
+	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpOtherMethod, method},
 			postData);
 }
 
 // GET the URI
 void URIGet(URI *uri)
 {
-	uri->provider->request(uri, &(HTTPMethod){httpGET}, NULL);
+	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpGET}, NULL);
 }
 
 // POST to the URI
 void URIPost(URI *uri, Stream *postData)
 {
-	uri->provider->request(uri, &(HTTPMethod){httpPOST}, NULL);
+	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpPOST}, NULL);
 }
 
 // forcibly close the uri request and response

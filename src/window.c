@@ -1020,6 +1020,8 @@ void PageURIOnStatus(void *obj, short httpStatus)
 	}
 	pWin->document = NewDOMDocument();
 	TESetText("", 0, pWin->contentTE);
+	InvalRect(&(*pWin->contentTE)->viewRect);
+	EraseRect(&(*pWin->contentTE)->viewRect);
 }
 
 void PageURIOnHeader(void *obj, HTTPHeader *header)
@@ -1027,10 +1029,10 @@ void PageURIOnHeader(void *obj, HTTPHeader *header)
 	PageWindow *pWin = (PageWindow *)obj;
 	switch (header->name) {
 		case httpContentType:
-			alertf("Got content type: %s", header->value);
+			//alertf("Got content type: %s", header->value);
 			break;
 		case httpContentLength:
-			alertf("Got content length: %s", header->value);
+			//alertf("Got content length: %s", header->value);
 			break;
 	}
 }

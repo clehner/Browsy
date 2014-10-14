@@ -78,7 +78,8 @@ struct URIConsumer {
 // functions for writing and receiving from a stream
 struct URIProvider {
 	void *(*init)(URI *uri, char *uriStr);
-	void (*request)(URI *uri, HTTPMethod *method, struct Stream *postData);
+	void (*request)(URI *uri, void *providerData, struct HTTPMethod *method,
+			struct Stream *postData);
 	void (*close)(URI *uri, void *providerData);
 	/*
 	void (*write)(Stream *s, void *pData, char *data, unsigned short len);

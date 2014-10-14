@@ -1,6 +1,10 @@
 #ifndef _UTILS_H
 #define _UTILs_H
 
+#include <Events.h>
+#include <Quickdraw.h>
+#include <TextEdit.h>
+
 #define SIZE(array) (sizeof(array) / sizeof((array)[0]))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
