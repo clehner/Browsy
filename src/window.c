@@ -1019,6 +1019,7 @@ void PageURIOnStatus(void *obj, short httpStatus)
 		DisposeDOMDocument(pWin->document);
 	}
 	pWin->document = NewDOMDocument();
+	TESetText("", 0, pWin->contentTE);
 }
 
 void PageURIOnHeader(void *obj, HTTPHeader *header)

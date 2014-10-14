@@ -35,8 +35,10 @@ void AboutProviderRequest(URI *uri, HTTPMethod *method, Stream *postData)
 	}
 
 	URIGotStatus(uri, 200);
-	char msg[] = "about worked!\nyay\n";
-	URIGotData(uri, msg, sizeof msg);
+	char msg1[] = "about worked!\r";
+	char msg2[] = "yay\r";
+	URIGotData(uri, msg1, sizeof msg1 - 1);
+	URIGotData(uri, msg2, sizeof msg2 - 1);
 	URIClosed(uri, 0);
 }
 

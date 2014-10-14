@@ -364,6 +364,7 @@ void alertf(char *fmt, ...) {
 	StopAlert(129, NULL);
 }
 
+// append text to a textedit field
 void TEAppendText(const void *text, long len, TEHandle hTE)
 {
 	char *start, *end;
@@ -372,20 +373,11 @@ void TEAppendText(const void *text, long len, TEHandle hTE)
 	TEPtr te = *hTE;
 	Handle hText = te->hText;
 
-	/*
-	err = PtrAndHand(text, (*hTE)->hText, len);
-	if (err) {
-		alertf("Error appending text: %u", err);
-	}
-	te->teLength += len;
-	return;
-	*/
-
 	curLen = te->teLength;
-	newLen = te->teLength + len;
+	newLen = curLen + len;
 
 	if (InlineGetHandleSize(hText) < newLen) {
-		ReallocateHandle(hText, newLen);
+		SetHandleSize(hText, newLen);
 	}
 
 	HLock(hText);
@@ -393,4 +385,5 @@ void TEAppendText(const void *text, long len, TEHandle hTE)
 	HUnlock(hText);
 
 	te->teLength = newLen;
+	TECalText(hTE);
 }
