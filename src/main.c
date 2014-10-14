@@ -4,6 +4,7 @@
 #include <ToolUtils.h>
 #include <Sound.h>
 #include <AppleEvents.h>
+#include "stream.h"
 #include "Browsy.h"
 #include "window.h"
 #include "menus.h"
@@ -67,6 +68,7 @@ void MainLoop() {
 		ok = WNE(everyEvent, &event, 10L, nil);
 		if (ok) {
 			HandleEvent(&event);
+			PollStreams();
 		} else {
 			// idle
 		}

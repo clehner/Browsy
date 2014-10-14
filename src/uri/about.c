@@ -44,12 +44,14 @@ void *AboutProviderInit(URI *uri, char *uriStr)
 {
 	size_t len = strlen(uriStr) + 1;
 	char *data = malloc(len);
+	if (!data) return NULL;
 	strncpy(data, uriStr, len);
 	return data;
 }
 
 void AboutProviderClose(URI *uri, void *providerData)
 {
+	free(providerData);
 }
 
 void AboutProviderRequest(URI *uri, void *providerData, HTTPMethod *method,
@@ -83,5 +85,6 @@ void AboutProviderRequest(URI *uri, void *providerData, HTTPMethod *method,
 		ReleaseResource(text);
 	}
 	URIClosed(uri, 0);
+	free(providerData);
 }
 

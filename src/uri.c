@@ -17,6 +17,7 @@
 #include "window.h"
 
 #include "uri/about.h"
+#include "uri/file.h"
 
 /*
 char *GuessContentType(char *path) {
@@ -147,7 +148,7 @@ void RequestURI(
 
 #define HTTP_SCHEME_PROVIDERS \
 X("about", aboutURIProvider) \
-X("file", aboutURIProvider) \
+X("file", fileURIProvider) \
 X("http", aboutURIProvider)
 
 // URI object: a remote resource that may be requested and may respond

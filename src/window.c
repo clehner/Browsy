@@ -915,6 +915,7 @@ void PageWindowNavigateHome(PageWindow *pWin) {
 	//char *home = "file:///Macintosh HD/DOMDocuments/Browsy/page.html";
 	//char *home = "about:Browsy";
 	char *home = "about:stuff";
+	//char *home = "file:///Macintosh HD/asdf.txt";
 	//char *home = "file:///Untitled/Browsy";
 	//char *home = "file:///Launcher/page.html";
 
@@ -1022,6 +1023,10 @@ void PageURIOnStatus(void *obj, short httpStatus)
 	TESetText("", 0, pWin->contentTE);
 	InvalRect(&(*pWin->contentTE)->viewRect);
 	EraseRect(&(*pWin->contentTE)->viewRect);
+
+	static char statusBuf[128];
+	snprintf(statusBuf, sizeof(statusBuf), "status: %hu", httpStatus);
+	PageWindowSetStatus(pWin, statusBuf);
 }
 
 void PageURIOnHeader(void *obj, HTTPHeader *header)

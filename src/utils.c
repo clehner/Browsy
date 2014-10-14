@@ -331,7 +331,8 @@ void CtoP(char *cstr, unsigned char *pstr) {
 }
 
 // copy a c string to new pascal string, allocating memory for it
-StringPtr CtoPCopy(const char *cstr) {
+StringPtr CtoPCopy(const char *cstr)
+{
 	short len = strlen(cstr);
 	StringPtr pstr = NewPtr(len + 1L);
 	if (!pstr) return NULL;
