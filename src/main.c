@@ -48,6 +48,7 @@ void Initialize() {
 	CheckEnvironment();
 	SetupMenus();
 	InitAppleEvents();
+	InitStreams();
 	InitPageWindows();
 }
 

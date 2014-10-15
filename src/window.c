@@ -359,8 +359,8 @@ void PageWindowResized(PageWindow *pWin, Rect oldPort) {
 	statusTEPtr->viewRect.bottom = pr.bottom;
 	statusTEPtr->viewRect.right = statusTEPtr->destRect.right = pr.right - 15;
 
-	//EraseRect(&statusTEPtr->viewRect);
-	//InvalRect(&statusTEPtr->viewRect);
+	EraseRect(&statusTEPtr->viewRect);
+	InvalRect(&statusTEPtr->viewRect);
 
 	PageWindowAdjustScrollBars(pWin);
 	//PageWindowSetStatus(pWin, "asdfgasdfasdfy");
