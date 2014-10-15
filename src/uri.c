@@ -18,6 +18,7 @@
 
 #include "uri/about.h"
 #include "uri/file.h"
+#include "uri/http.h"
 
 /*
 char *GuessContentType(char *path) {
@@ -149,7 +150,7 @@ void RequestURI(
 #define HTTP_SCHEME_PROVIDERS \
 X("about", aboutURIProvider) \
 X("file", fileURIProvider) \
-X("http", aboutURIProvider)
+X("http", httpURIProvider)
 
 // URI object: a remote resource that may be requested and may respond
 struct URI {
