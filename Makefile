@@ -109,12 +109,12 @@ $(DEP_DIR) $(LIB_DIR):
 run: $(BIN).dsk
 	$(QUIET_RUN)$(MINI_VMAC) $(MINI_VMAC_LAUNCHER_DISK) $(DISK) $(BIN).dsk
 
-share: $(SHAREDIR)/$(BIN).APPL
+share: $(SHAREDIR)/$(BIN)
 
-$(SHAREDIR)/$(BIN).APPL: $(BIN).APPL
-	cp $(BIN).APPL $(SHAREDIR)/
-	@cp .rsrc/$(BIN).APPL $(SHAREDIR)/.rsrc/
-	@cp .finf/$(BIN).APPL $(SHAREDIR)/.finf/
+$(SHAREDIR)/$(BIN): $(BIN).APPL
+	cp $(BIN).APPL $(SHAREDIR)/$(BIN)
+	@cp .rsrc/$(BIN).APPL $(SHAREDIR)/.rsrc/$(BIN)
+	@cp .finf/$(BIN).APPL $(SHAREDIR)/.finf/$(BIN)
 
 run-basiliskii: share
 	ps aux | grep -v grep | grep BasiliskII -s || BasiliskII &
