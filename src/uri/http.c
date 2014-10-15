@@ -200,6 +200,7 @@ int HTTPOnHeaderValue(http_parser *parser, const char *at, size_t len)
 int HTTPOnHeadersComplete(http_parser *parser)
 {
 	struct HTTPURIData *hData = (struct HTTPURIData *)parser->data;
+	URIHeadersComplete(hData->uri);
 	return 0;
 }
 

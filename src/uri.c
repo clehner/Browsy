@@ -252,6 +252,11 @@ void URIGotHeader(URI *uri, struct HTTPHeader *header)
 	uri->consumer->on_header(uri->consumerData, header);
 }
 
+void URIHeadersComplete(URI *uri)
+{
+	uri->consumer->on_headers_complete(uri->consumerData);
+}
+
 void URIGotData(URI *uri, char *data, short len)
 {
 	uri->consumer->on_data(uri->consumerData, data, len);

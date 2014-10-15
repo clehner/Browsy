@@ -54,12 +54,14 @@ pascal void ScrollAction(ControlHandle control, short part);
 
 void PageURIOnStatus(void *obj, short httpStatus);
 void PageURIOnHeader(void *obj, struct HTTPHeader *header);
+void PageURIOnHeadersComplete(void *obj);
 void PageURIOnData(void *obj, char *data, short len);
 void PageURIOnClose(void *obj, short err);
 
 URIConsumer PageURIConsumer = {
 	.on_status = PageURIOnStatus,
 	.on_header = PageURIOnHeader,
+	.on_headers_complete = PageURIOnHeadersComplete,
 	.on_data = PageURIOnData,
 	.on_close = PageURIOnClose
 };
@@ -1040,6 +1042,13 @@ void PageURIOnHeader(void *obj, HTTPHeader *header)
 			//alertf("Got content length: %s", header->value);
 			break;
 	}
+}
+
+void PageURIOnHeadersComplete(void *obj)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+
+	(void)pWin;
 }
 
 void PageURIOnData(void *obj, char *data, short len)
