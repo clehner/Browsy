@@ -217,6 +217,7 @@ PageWindow* NewPageWindow() {
 	pWin->history = NULL;
 	pWin->isLoading = false;
 	pWin->document = NULL;
+	pWin->uri = NULL;
 
 	FrameAddressBar(pWin);
 	PageWindowAdjustScrollBars(pWin);
@@ -360,6 +361,9 @@ void PageWindowResized(PageWindow *pWin, Rect oldPort) {
 	statusTEPtr->destRect.bottom = statusTEPtr->viewRect.top + 12;
 	statusTEPtr->viewRect.bottom = pr.bottom;
 	statusTEPtr->viewRect.right = statusTEPtr->destRect.right = pr.right - 15;
+
+	InvalRect(&contentTEPtr->viewRect);
+	EraseRect(&contentTEPtr->viewRect);
 
 	EraseRect(&statusTEPtr->viewRect);
 	InvalRect(&statusTEPtr->viewRect);

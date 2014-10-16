@@ -135,7 +135,7 @@ void TCPOnOpen(void *consumerData)
 		return;
 	}
 
-	alertf("sending http request (%hu): %s", reqLen, reqMsg);
+	//alertf("sending http request (%hu): %s", reqLen, reqMsg);
 
 	// Send the request
 	StreamWrite(hData->tcpStream, reqMsg, reqLen);
@@ -145,11 +145,17 @@ void TCPOnData(void *consumerData, char *data, short len)
 {
 	struct HTTPURIData *hData = (struct HTTPURIData *)consumerData;
 	size_t nparsed;
-	alertf("tcp data [%ld]: %s", len, data);
+
+	/*
+	alertf("got data (%lu)", len);
+	URIGotData(hData->uri, data, len);
+	return;
+	*/
 
 	nparsed = http_parser_execute(&hData->parser, &parserSettings, data, len);
 	if (nparsed != len) {
 		// parser had an error. close connection
+		//alertf("parsing error for text (%lu): %.*s", len, (int)len, data);
 		StreamClose(hData->tcpStream);
 		URIClosed(hData->uri, -1);
 	}
