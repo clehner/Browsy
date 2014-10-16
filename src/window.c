@@ -662,6 +662,11 @@ void PageWindowNavigate(PageWindow *pWin, char *location) {
 	// redraw buttons
 	InvalRect(&toolbarButtonsRect);
 
+	if (pWin->uri) {
+		// cancel previous request
+		URIClose(pWin->uri);
+	}
+
 	pWin->uri = NewURI(newLocation);
 	if (!pWin->uri) {
 		ErrorAlert("Unable to create URI request.");

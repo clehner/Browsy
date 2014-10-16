@@ -16,7 +16,6 @@ struct HTTPURIData {
 	Stream *tcpStream;
 	http_parser parser;
 	short err;
-	bool closed;
 };
 
 void *HTTPProviderInit(URI *uri, char *uriStr);
@@ -52,13 +51,14 @@ void TCPOnOpen(void *consumerData);
 void TCPOnData(void *consumerData, char *data, short len);
 void TCPOnError(void *consumerData, short err);
 void TCPOnClose(void *consumerData);
+void TCPOnEnd(void *consumerData);
 
 StreamConsumer tcpConsumer = {
 	.on_open = TCPOnOpen,
 	.on_data = TCPOnData,
 	.on_error = TCPOnError,
 	.on_close = TCPOnClose,
-	.on_end = TCPOnClose,
+	.on_end = TCPOnEnd,
 };
 
 // create and return the provider data
@@ -77,7 +77,6 @@ void *HTTPProviderInit(URI *uri, char *uriStr)
 	data->uri = uri;
 	data->uriStr = url_decode(uriStr);
 	data->tcpStream = tcpStream;
-	data->closed = false;
 	data->err = 0;
 	http_parser_init(&data->parser, HTTP_RESPONSE);
 	data->parser.data = data;
@@ -170,9 +169,11 @@ void TCPOnError(void *consumerData, short err)
 void TCPOnClose(void *consumerData)
 {
 	struct HTTPURIData *data = (struct HTTPURIData *)consumerData;
-	if (data->closed) return;
-	data->closed = true;
-	URIClosed(data->uri, data->err);
+	http_parser_execute(&data->parser, &parserSettings, "", 0);
+}
+
+void TCPOnEnd(void *consumerData)
+{
 }
 
 int HTTPOnMessageBegin(http_parser *parser)
@@ -214,7 +215,7 @@ int HTTPOnBody(http_parser *parser, const char *at, size_t len)
 int HTTPOnMessageComplete(http_parser *parser)
 {
 	struct HTTPURIData *hData = (struct HTTPURIData *)parser->data;
-	hData->closed = true;
+	//TODO: check if it happens multiple times
 	URIClosed(hData->uri, hData->err);
 }
 
