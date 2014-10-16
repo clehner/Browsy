@@ -369,22 +369,55 @@ void alertf(char *fmt, ...) {
 // append text to a textedit field
 void TEAppendText(const void *text, long len, TEHandle hTE)
 {
-	char *start, *end;
-	long curLen, newLen;
-	short err;
+	static const short tabSize = 4;
+	char *cur, *end, *dest;
+	long newLen;
+	short i;
+	char c;
+
+	end = (char *)text + len;
 	TEPtr te = *hTE;
 	Handle hText = te->hText;
+	newLen = te->teLength + len;
 
-	curLen = te->teLength;
-	newLen = curLen + len;
+	// Adjust length
+	for (cur = (char *)text; cur < end; cur++) {
+		switch (*cur) {
+			// Expand tabs
+			case '\t':
+				newLen += tabSize;
+				break;
+			// Collapse \r\n
+			case '\n':
+				if (cur[-1] == '\r') {
+					newLen--;
+				}
+				break;
+		}
+	}
 
+	// Expand block if needed
 	if (InlineGetHandleSize(hText) < newLen) {
 		SetHandleSize(hText, newLen);
 	}
 
-	HLock(hText);
-	BlockMove(text, *hText + curLen, len);
-	HUnlock(hText);
+	// Append the text
+	dest = *hText;
+	for (cur = (char *)text; cur < end; cur++) {
+		switch (c = *cur) {
+			case '\t':
+				for (i = 0; i < tabSize; i++)
+					*dest++ = ' ';
+				break;
+			case '\n':
+				if (cur[-1] != '\r') {
+					*dest++ = '\n';
+				}
+				break;
+			default:
+				*dest++ = c;
+		}
+	}
 
 	te->teLength = newLen;
 	TECalText(hTE);
