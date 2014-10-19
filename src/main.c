@@ -69,10 +69,10 @@ void MainLoop() {
 		ok = WNE(everyEvent, &event, 10L, nil);
 		if (ok) {
 			HandleEvent(&event);
-			PollStreams();
 		} else {
 			// idle
 		}
+		PollStreams();
 		DoIdle();
 	}
 }
