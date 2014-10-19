@@ -49,6 +49,7 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect);
 void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
+void StopLoading(PageWindow *pWin);
 
 pascal void ScrollAction(ControlHandle control, short part);
 
@@ -560,7 +561,7 @@ void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
 		} else if (r == &toolbarRectHome) {
 			PageWindowNavigateHome(pWin);
 		} else if (r == &toolbarRectStop) {
-			//StopLoading(pWin);
+			StopLoading(pWin);
 		} else {
 			ErrorAlert("Unknown button pressed.");
 		}
@@ -643,6 +644,15 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect) {
 	SetPort(pWin->window);
 }
 
+void StopLoading(PageWindow *pWin) {
+	if (pWin->uri) {
+		URIClose(pWin->uri);
+		// free?
+		pWin->uri = NULL;
+		LoadingEnded(pWin);
+	}
+}
+
 void PageWindowNavigate(PageWindow *pWin, char *location) {
 	HistoryItem *historyItem;
 	char *newLocation = url_sanitize(location);
@@ -672,10 +682,8 @@ void PageWindowNavigate(PageWindow *pWin, char *location) {
 	// redraw buttons
 	InvalRect(&toolbarButtonsRect);
 
-	if (pWin->uri) {
-		// cancel previous request
-		URIClose(pWin->uri);
-	}
+	// cancel previous request
+	StopLoading(pWin);
 
 	pWin->uri = NewURI(newLocation);
 	if (!pWin->uri) {
