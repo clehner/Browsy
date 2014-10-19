@@ -98,7 +98,7 @@ void URIGet(URI *uri);
 void URIPost(URI *uri, struct Stream *postData);
 
 // call by provider
-void URIProvide(URI *uri, URIProvider *provider, char *uriStr);
+int URIProvide(URI *uri, URIProvider *provider, char *uriStr);
 void URIGotStatus(URI *uri, short status);
 void URIGotHeader(URI *uri, struct HTTPHeader *header);
 void URIHeadersComplete(URI *uri);

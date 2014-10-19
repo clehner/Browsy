@@ -172,7 +172,11 @@ URI *NewURI(char *uriStr)
 	uri = malloc(sizeof(URI));
 	if (!uri) return NULL;
 
-	URIProvide(uri, provider, uriStr);
+	if (URIProvide(uri, provider, uriStr)) {
+		free(uri);
+		return NULL;
+	}
+
 	return uri;
 }
 
@@ -209,29 +213,32 @@ void URIConsume(URI *uri, URIConsumer *consumer, void *consumerData)
 }
 
 // set the uri provider
-void URIProvide(URI *uri, URIProvider *provider, char *uriStr)
+int URIProvide(URI *uri, URIProvider *provider, char *uriStr)
 {
 	uri->provider = provider;
 	uri->providerData = provider->init(uri, uriStr);
+	return uri->providerData ? 0 : -1;
 }
 
 // request the URI, optionally sending along some data
 void URIRequest(URI *uri, char *method, Stream *postData)
 {
-	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpOtherMethod, method},
-			postData);
+	uri->provider->request(uri, uri->providerData,
+			&(HTTPMethod){httpOtherMethod, method}, postData);
 }
 
 // GET the URI
 void URIGet(URI *uri)
 {
-	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpGET}, NULL);
+	uri->provider->request(uri, uri->providerData,
+			&(HTTPMethod){httpGET}, NULL);
 }
 
 // POST to the URI
 void URIPost(URI *uri, Stream *postData)
 {
-	uri->provider->request(uri, uri->providerData, &(HTTPMethod){httpPOST}, NULL);
+	uri->provider->request(uri, uri->providerData,
+			&(HTTPMethod){httpPOST}, NULL);
 }
 
 // forcibly close the uri request and response
