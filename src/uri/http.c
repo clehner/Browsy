@@ -3,12 +3,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include "Browsy.h"
 #include "stream.h"
 #include "tcpstream.h"
 #include "utils.h"
 #include "uri.h"
 #include "http_parser.h"
 #include "uri/http.h"
+
+#define HTTP_UA "Browsy/" BROWSY_VERSION " (Macintosh; N; 68K)"
+// "Lynx/2.8 (compatible; Browsy/" VERSION " (Macintosh; N; 68K)"
 
 struct HTTPURIData {
 	URI *uri;
@@ -158,6 +162,7 @@ void TCPOnOpen(void *consumerData)
 	// Build the HTTP request
 	reqLen = snprintf(reqMsg, sizeof reqMsg,
 			"GET %s HTTP/1.1\r\n"
+			"User-Agent: " HTTP_UA "\r\n"
 			"Host: %s\r\n"
 			"Connection: Close\r\n"
 			"\r\n",
