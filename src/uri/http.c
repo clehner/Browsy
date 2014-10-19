@@ -12,10 +12,12 @@
 
 struct HTTPURIData {
 	URI *uri;
-	char *uriStr;
 	Stream *tcpStream;
 	http_parser parser;
 	short err;
+	short port;
+	char host[256];
+	char path[256];
 };
 
 void *HTTPProviderInit(URI *uri, char *uriStr);
@@ -65,34 +67,66 @@ StreamConsumer tcpConsumer = {
 void *HTTPProviderInit(URI *uri, char *uriStr)
 {
 	struct HTTPURIData *data;
-	Stream *tcpStream = NewStream();
-	if (!tcpStream) return NULL;
+	Stream *tcpStream;
+	struct http_parser_url urlParser;
+	size_t hostLen, pathLen;
+
+	if (http_parser_parse_url(uriStr, strlen(uriStr), false, &urlParser)) {
+		alertf("Error parsing URL %s", uriStr);
+		return NULL;
+	}
+
+	if (!(urlParser.field_set & (1 << UF_HOST))) {
+		alertf("URL missing host");
+		return NULL;
+	}
+	hostLen = urlParser.field_data[UF_HOST].len;
+	if (hostLen > sizeof data->host) {
+		alertf("URL host too long");
+		return NULL;
+	}
+
+	if (!(urlParser.field_set & (1 << UF_PATH))) {
+		alertf("URL missing path");
+		return NULL;
+	}
+	pathLen = urlParser.field_data[UF_PATH].len;
+	if (!(urlParser.field_set & (1 << UF_PATH))) {
+		alertf("URL missing path");
+		return NULL;
+	}
 
 	data = malloc(sizeof(struct HTTPURIData));
 	if (!data) {
-		free(tcpStream);
+		return NULL;
+	}
+
+	data->port = urlParser.port ? urlParser.port : 80;
+	strncpy(data->host, uriStr + urlParser.field_data[UF_HOST].off, hostLen);
+	strncpy(data->path, uriStr + urlParser.field_data[UF_PATH].off, pathLen);
+	data->path[pathLen] = '\0';
+	data->host[hostLen] = '\0';
+
+	tcpStream = NewStream();
+	if (!tcpStream) {
+		free(data);
 		return NULL;
 	}
 
 	data->uri = uri;
-	data->uriStr = url_decode(uriStr);
 	data->tcpStream = tcpStream;
 	data->err = 0;
 	http_parser_init(&data->parser, HTTP_RESPONSE);
 	data->parser.data = data;
 
 	StreamConsume(tcpStream, &tcpConsumer, data);
-
-	// set up the http stream
-	//ProvideTCPActiveStream(tcpStream, data->uriStr);
-	ProvideTCPActiveStream(tcpStream, IP_ADDR(192,168,0,1), 80);
+	ProvideTCPActiveStream(tcpStream, data->host, data->port);
 	return data;
 }
 
 void HTTPProviderClose(URI *uri, void *providerData)
 {
 	struct HTTPURIData *data = (struct HTTPURIData *)providerData;
-	free(data->uriStr);
 	StreamClose(data->tcpStream);
 	free(data);
 }
@@ -120,13 +154,14 @@ void TCPOnOpen(void *consumerData)
 	struct HTTPURIData *hData = (struct HTTPURIData *)consumerData;
 	char reqMsg[256];
 	short reqLen;
-	char *reqPath = "/"; // TODO
-	char *host = "localhost"; // TODO
 
 	// Build the HTTP request
 	reqLen = snprintf(reqMsg, sizeof reqMsg,
-			"GET %s HTTP/1.1\r\nHost: %s\r\nConnection: Close\r\n\r\n",
-			reqPath, host);
+			"GET %s HTTP/1.1\r\n"
+			"Host: %s\r\n"
+			"Connection: Close\r\n"
+			"\r\n",
+			hData->path, hData->host);
 	if (reqLen >= sizeof reqMsg) {
 		// request was truncated
 		alertf("request truncated");

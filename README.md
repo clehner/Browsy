@@ -14,7 +14,6 @@ A browser for System 6.
 
 - Implement scrolling
 - Debug crashes
-- Implement DNS resolution
 - Add download window
 - Parse HTML and maybe CSS
 - Render pages
