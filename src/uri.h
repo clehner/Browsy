@@ -72,6 +72,7 @@ struct URIConsumer {
 	void (*on_status)(void *consumerData, short httpStatus);
 	void (*on_header)(void *consumerData, struct HTTPHeader *header);
 	void (*on_headers_complete)(void *consumerData);
+	void (*on_message_begin)(void *consumerData);
 	void (*on_data)(void *consumerData, char *data, short len);
 	void (*on_close)(void *consumerData, short err);
 };
@@ -102,6 +103,7 @@ int URIProvide(URI *uri, URIProvider *provider, char *uriStr);
 void URIGotStatus(URI *uri, short status);
 void URIGotHeader(URI *uri, struct HTTPHeader *header);
 void URIHeadersComplete(URI *uri);
+void URIMessageBegin(URI *uri);
 void URIGotData(URI *uri, char *data, short len);
 void URIClosed(URI *uri, short error);
 

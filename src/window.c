@@ -56,6 +56,7 @@ pascal void ScrollAction(ControlHandle control, short part);
 void PageURIOnStatus(void *obj, short httpStatus);
 void PageURIOnHeader(void *obj, struct HTTPHeader *header);
 void PageURIOnHeadersComplete(void *obj);
+void PageURIOnMessageBegin(void *obj);
 void PageURIOnData(void *obj, char *data, short len);
 void PageURIOnClose(void *obj, short err);
 
@@ -63,6 +64,7 @@ URIConsumer PageURIConsumer = {
 	.on_status = PageURIOnStatus,
 	.on_header = PageURIOnHeader,
 	.on_headers_complete = PageURIOnHeadersComplete,
+	.on_message_begin = PageURIOnMessageBegin,
 	.on_data = PageURIOnData,
 	.on_close = PageURIOnClose
 };
@@ -1045,7 +1047,6 @@ void PageURIOnStatus(void *obj, short httpStatus)
 		DisposeDOMDocument(pWin->document);
 	}
 	pWin->document = NewDOMDocument();
-	TESetText("", 0, pWin->contentTE);
 	InvalRect(&(*pWin->contentTE)->viewRect);
 	EraseRect(&(*pWin->contentTE)->viewRect);
 
@@ -1069,15 +1070,17 @@ void PageURIOnHeader(void *obj, HTTPHeader *header)
 
 void PageURIOnHeadersComplete(void *obj)
 {
-	PageWindow *pWin = (PageWindow *)obj;
+}
 
-	(void)pWin;
+void PageURIOnMessageBegin(void *obj)
+{
+	PageWindow *pWin = (PageWindow *)obj;
+	TESetText("", 0, pWin->contentTE);
 }
 
 void PageURIOnData(void *obj, char *data, short len)
 {
 	PageWindow *pWin = (PageWindow *)obj;
-	//alertf("got data [%ld]: %s", len, data);
 	//DOMDocumentParseAppend(pWin->document, data, len);
 
 	//PageWindowAdjustScrollBars(pWin);

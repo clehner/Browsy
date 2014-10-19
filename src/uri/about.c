@@ -51,7 +51,8 @@ void *AboutProviderInit(URI *uri, char *uriStr)
 
 void AboutProviderClose(URI *uri, void *providerData)
 {
-	free(providerData);
+	//TODO: fix stream freeing
+	//free(providerData);
 }
 
 void AboutProviderRequest(URI *uri, void *providerData, HTTPMethod *method,
@@ -76,9 +77,11 @@ void AboutProviderRequest(URI *uri, void *providerData, HTTPMethod *method,
 	}
 	if (text == NULL) {
 		URIGotStatus(uri, 404);
+		URIMessageBegin(uri);
 	} else {
 		URIGotStatus(uri, 200);
 		URIGotHeader(uri, &(HTTPHeader){httpContentType, "text/plain"});
+		URIMessageBegin(uri);
 		HLock(text);
 		URIGotData(uri, *text, InlineGetHandleSize(text));
 		HUnlock(text);

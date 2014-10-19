@@ -228,6 +228,9 @@ void TCPOnEnd(void *consumerData)
 
 int HTTPOnMessageBegin(http_parser *parser)
 {
+	struct HTTPURIData *hData = (struct HTTPURIData *)parser->data;
+	URIMessageBegin(hData->uri); 
+	//alertf("message begin");
 	return 0;
 }
 

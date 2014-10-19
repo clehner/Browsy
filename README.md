@@ -13,7 +13,7 @@ A browser for System 6.
 ## TODO
 
 - Implement scrolling
-- Debug crashes
+- Fix handling of chunked transfer encoding
 - Add download window
 - Parse HTML and maybe CSS
 - Render pages

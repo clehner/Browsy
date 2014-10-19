@@ -113,6 +113,7 @@ void FileConsumeOpen(void *consumerData)
 {
 	struct FileURIData *data = (struct FileURIData *)consumerData;
 	URIGotStatus(data->uri, 200);
+	URIMessageBegin(data->uri);
 }
 
 void FileConsumeData(void *consumerData, char *data, short len)

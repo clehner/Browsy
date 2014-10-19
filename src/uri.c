@@ -264,6 +264,11 @@ void URIHeadersComplete(URI *uri)
 	uri->consumer->on_headers_complete(uri->consumerData);
 }
 
+void URIMessageBegin(URI *uri)
+{
+	uri->consumer->on_message_begin(uri->consumerData);
+}
+
 void URIGotData(URI *uri, char *data, short len)
 {
 	uri->consumer->on_data(uri->consumerData, data, len);
