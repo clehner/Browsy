@@ -256,6 +256,7 @@ char *url_encode(char *str) {
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_decode(char *str) {
   char *pstr = str, *buf = (char*)malloc(strlen(str) + 1), *pbuf = buf;
+  if (!buf) return NULL;
   while (*pstr) {
     if (*pstr == '%') {
       if (pstr[1] && pstr[2]) {
@@ -277,6 +278,7 @@ char *url_decode(char *str) {
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_sanitize(char *str) {
   char *pstr = str, *buf = (char*)malloc(strlen(str) * 3 + 1), *pbuf = buf;
+  if (!buf) return NULL;
   while (*pstr) {
     if (isalnum(*pstr) ||
 	  *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' ||
@@ -410,8 +412,9 @@ void TEAppendText(const void *text, long len, TEHandle hTE)
 					*dest++ = ' ';
 				break;
 			case '\n':
+				// Replace \r\n and \n with \r
 				if (cur[-1] != '\r') {
-					*dest++ = '\n';
+					*dest++ = '\r';
 				}
 				break;
 			default:

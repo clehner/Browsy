@@ -646,7 +646,13 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect) {
 void PageWindowNavigate(PageWindow *pWin, char *location) {
 	HistoryItem *historyItem;
 	char *newLocation = url_sanitize(location);
-	short len = strlen(newLocation);
+	short len;
+	if (!newLocation) {
+		ErrorAlert("Unable to copy URI");
+		return;
+	}
+
+	len = strlen(newLocation);
 
 	TESetText(newLocation, len, pWin->addressBarTE);
 	InvalRect(&(*pWin->addressBarTE)->viewRect);

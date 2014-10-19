@@ -190,9 +190,9 @@ void TCPOnData(void *consumerData, char *data, short len)
 	nparsed = http_parser_execute(&hData->parser, &parserSettings, data, len);
 	if (nparsed != len) {
 		// parser had an error. close connection
-		//alertf("parsing error for text (%lu): %.*s", len, (int)len, data);
-		StreamClose(hData->tcpStream);
-		URIClosed(hData->uri, -1);
+		alertf("parsing error %u/%u for text (%lu): %.*s", (int)nparsed, (int)len, len, (int)len, data);
+		//StreamClose(hData->tcpStream);
+		//URIClosed(hData->uri, -1);
 	}
 
 }
@@ -200,8 +200,12 @@ void TCPOnData(void *consumerData, char *data, short len)
 void TCPOnError(void *consumerData, short err)
 {
 	struct HTTPURIData *data = (struct HTTPURIData *)consumerData;
-	alertf("tcp stream error: %ld", err);
 	data->err = err;
+	if (err == tcpMissingDriverErr) {
+		alertf("Missing MacTCP driver");
+		return;
+	}
+	alertf("tcp stream error: %ld", err);
 	/*
 	   URIGotStatus(data->uri, status);
 	   */
