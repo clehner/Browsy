@@ -762,24 +762,48 @@ void PageWindowKeyDown(PageWindow *pWin, char theChar) {
 
 	if (pWin->focusTE == pWin->contentTE) {
 	} else if (pWin->focusTE == pWin->addressBarTE) {
-		if (theChar == '\r' || theChar == '\n') {
-			if (te->teLength == 0 && pWin->history) {
-				// Put back current address
-				location = pWin->history->address;
-				TESetText(location, strlen(location), pWin->addressBarTE);
-				InvalRect(&te->viewRect);
-			} else {
-				size_t len = te->teLength;
-				location = (char *) malloc((len + 1) * sizeof(char));
-				strncpy(location, *te->hText, len);
-				location[len] = '\0';
+		switch(theChar) {
+			case '\r':
+			case '\n':
+			case 3: // enter
+				// go to the address
+				if (te->teLength == 0 && pWin->history) {
+					// Put back current address
+					location = pWin->history->address;
+					TESetText(location, strlen(location), pWin->addressBarTE);
+					InvalRect(&te->viewRect);
+				} else {
+					size_t len = te->teLength;
+					location = (char *) malloc((len + 1) * sizeof(char));
+					strncpy(location, *te->hText, len);
+					location[len] = '\0';
 
-				PageWindowNavigate(pWin, location);
-				free(location);
-			}
-		} else {
-			TEKey(theChar, pWin->addressBarTE);
-			//FrameAddressBar(pWin);
+					PageWindowNavigate(pWin, location);
+					free(location);
+				}
+				break;
+			case 27: // delete
+				// unprintable
+				break;
+			case 11: // page up
+			case 1: // home 
+				// up arrow
+				TEKey(30, pWin->addressBarTE);
+				break;
+			case 12: // page down
+			case 4: // end
+				// down arrow
+				TEKey(31, pWin->addressBarTE);
+				break;
+			case 127: // forward delete
+				if (te->selStart != te->teLength) {
+					TEKey(29, pWin->addressBarTE); // right
+					TEKey(8, pWin->addressBarTE); // delete
+				}
+				break;
+			default:
+				// regular character
+				TEKey(theChar, pWin->addressBarTE);
 		}
 	} else {
 		if (theChar == '\r') {
