@@ -404,7 +404,7 @@ void TEAppendText(const void *text, long len, TEHandle hTE)
 	}
 
 	// Append the text
-	dest = *hText;
+	dest = *hText + te->teLength;
 	for (cur = (char *)text; cur < end; cur++) {
 		switch (c = *cur) {
 			case '\t':
