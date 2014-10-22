@@ -274,32 +274,57 @@ char *url_decode(char *str) {
   return buf;
 }
 
+// get where a character is safe for url
+// return true if it is safe
+// return false if it has to be escaped
+static inline char is_char_urlsafe(char c) {
+	return isalnum(c) ||
+		c == '-' || c == '_' || c == '.' || c == '~' ||
+		c == ':' || c == '/' || c == '?' || c == '&' ||
+		c == '=' || c == '%' || c == ';';
+}
+
 /* Make sure a str is url-encoded and has a scheme */
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_sanitize(char *str) {
-  static const char default_scheme[] = "http://";
-  char *pstr = str,
-       *buf = (char*)malloc(strlen(str) * 3 + sizeof(default_scheme)),
-       *pbuf = buf;
-  if (!buf) return NULL;
-  if (!strchr(str, ':')) {
-    strcpy(pbuf, default_scheme);
-    pbuf += sizeof(default_scheme) - 1;
-  }
-  while (*pstr) {
-    if (isalnum(*pstr) ||
-	  *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' ||
-	  *pstr == ':' || *pstr == '/' || *pstr == '?' || *pstr == '&' ||
-	  *pstr == '=' || *pstr == '%' || *pstr == ';')
-      *pbuf++ = *pstr;
-    //else if (*pstr == ' ')
-      //*pbuf++ = '+';
-    else
-      *pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
-    pstr++;
-  }
-  *pbuf = '\0';
-  return buf;
+	static const char default_scheme[] = "http://";
+	char insert_default_scheme = true;
+	short len = strlen(str) + 1;
+	char pchar;
+	char *pstr, *buf, *pbuf;
+
+	// calculate new string length
+	for (pstr = str; pchar = *pstr; pstr++) {
+		if (!is_char_urlsafe(pchar))
+			len += 2;
+		else if (pchar == ':' && insert_default_scheme) {
+			insert_default_scheme = false;
+		}
+	}
+	if (insert_default_scheme) {
+		len += sizeof(default_scheme) - 1;
+	}
+
+	// allocate the string
+	buf = pbuf = malloc(len);
+	if (!buf) return NULL;
+
+	// copy the string
+	if (insert_default_scheme) {
+		strcpy(pbuf, default_scheme);
+		pbuf += sizeof(default_scheme) - 1;
+	}
+	for (pstr = str; pchar = *pstr; pstr++) {
+		if (is_char_urlsafe(pchar)) {
+			*pbuf++ = pchar;
+		} else {
+			*pbuf++ = '%';
+			*pbuf++ = to_hex(pchar >> 4);
+			*pbuf++ = to_hex(pchar & 15);
+		}
+	}
+	*pbuf = '\0';
+	return buf;
 }
 
 // from Apple Technical Note TN1019,
