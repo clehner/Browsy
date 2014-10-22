@@ -49,7 +49,6 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect);
 void DebugSave(long bytes, Ptr buffer);
 void LoadingStarted(PageWindow *pWin);
 void LoadingEnded(PageWindow *pWin);
-void StopLoading(PageWindow *pWin);
 
 pascal void ScrollAction(ControlHandle control, short part);
 
@@ -567,7 +566,7 @@ void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
 		} else if (r == &toolbarRectStopRefresh) {
 			if (pWin->isLoading) {
 				// stop
-				StopLoading(pWin);
+				PageWindowStop(pWin);
 			} else {
 				// refresh
 				PageWindowNavigateHistory(pWin, 0);
@@ -654,7 +653,7 @@ void PopupNavMenu(PageWindow *pWin, Rect *buttonRect) {
 	SetPort(pWin->window);
 }
 
-void StopLoading(PageWindow *pWin) {
+void PageWindowStop(PageWindow *pWin) {
 	if (pWin->uri) {
 		URIClose(pWin->uri);
 		// free?
@@ -693,7 +692,7 @@ void PageWindowNavigate(PageWindow *pWin, char *location) {
 	InvalRect(&toolbarButtonsRect);
 
 	// cancel previous request
-	StopLoading(pWin);
+	PageWindowStop(pWin);
 
 	pWin->uri = NewURI(newLocation);
 	if (!pWin->uri) {

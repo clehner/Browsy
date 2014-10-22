@@ -43,5 +43,6 @@ void PageWindowSaveAs(PageWindow *pWin);
 void PageWindowOpenFile(PageWindow *pWin);
 void PageWindowNavigateHistory(PageWindow *pWin, short amount);
 void PageWindowNavigateHome(PageWindow *pWin);
+void PageWindowStop(PageWindow *pWin);
 
 #endif

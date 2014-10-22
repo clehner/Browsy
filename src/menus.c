@@ -184,7 +184,7 @@ void HandleMenu(long menuAction) {
 					PageWindowNavigateHome(pWin);
 					break;
 				case navigateStopItem:
-					//PageWindowStop(pWin);
+					PageWindowStop(pWin);
 					break;
 				case navigateReloadItem:
 					PageWindowNavigateHistory(pWin, 0);
