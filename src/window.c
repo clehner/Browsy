@@ -21,22 +21,22 @@
 #define statusBarHeight 15
 #define defaultWindow 128
 #define handCursor 128
-#define toolbarButtonsWidth 84
+#define toolbarButtonsWidth 82
 #define navBtn 1
 #define toolbarIconsSICN 128
 #define toolbarIconsDisabledSICN 129
 #define navMenuPopupIds 1000
-enum {iconBack, iconForward, iconHome, iconStop};
+enum {iconBack, iconForward, iconHome, iconStop, iconRefresh};
 
 /*static Rect toolbarRects[] = {toolbarRectBack, toolbarRectForward,
 	toolbarRectHome, toolbarRectStop};*/
 
 Rect toolbarButtonsRect = {4, 4, toolbarHeight, toolbarButtonsWidth + 4};
 
-Rect toolbarRectBack	= {5,  5, 21, 21}; // top left bottom right
-Rect toolbarRectForward	= {5, 25, 21, 41};
-Rect toolbarRectHome	= {5, 45, 21, 61};
-Rect toolbarRectStop	= {5, 65, 21, 81};
+Rect toolbarRectBack		= {5,  5, 21, 21}; // top left bottom right
+Rect toolbarRectForward		= {5, 25, 21, 41};
+Rect toolbarRectHome		= {5, 45, 21, 61};
+Rect toolbarRectStopRefresh	= {5, 65, 21, 81};
 
 void Scroll(PageWindow *pWin, int h, int v);
 //void PageWindowAdjustScrollBars(PageWindow *pWin);
@@ -240,7 +240,9 @@ void DrawToolbarButtons(PageWindow *pWin) {
 	PlotSICN(&toolbarRectBack, history && history->prev ? iconsActive : iconsDisabled, iconBack);
 	PlotSICN(&toolbarRectForward, history && history->next ? iconsActive : iconsDisabled, iconForward);
 	PlotSICN(&toolbarRectHome, iconsActive, iconHome);
-	PlotSICN(&toolbarRectStop, pWin->isLoading ? iconsActive : iconsDisabled, iconStop);
+	PlotSICN(&toolbarRectStopRefresh,
+			pWin->isLoading || history ? iconsActive : iconsDisabled,
+			pWin->isLoading ? iconStop : iconRefresh);
 }
 
 void UpdatePageWindow(PageWindow *pWin) {
@@ -518,9 +520,9 @@ void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
 		r = &toolbarRectForward;
 	} else if (PtInRect(where, &toolbarRectHome)) {
 		r = &toolbarRectHome;
-	} else if (PtInRect(where, &toolbarRectStop)) {
-		if (!pWin->isLoading) return;
-		r = &toolbarRectStop;
+	} else if (PtInRect(where, &toolbarRectStopRefresh)) {
+		if (!pWin->isLoading && !pWin->history) return;
+		r = &toolbarRectStopRefresh;
 	}
 	RectRgn(mouseRgn, r);
 	//if (GetControlReference(ch) != navBtn) return;
@@ -562,8 +564,14 @@ void HandleNavButtonClick(PageWindow *pWin, /*ControlHandle ch, */Point where) {
 			PageWindowNavigateHistory(pWin, 1);
 		} else if (r == &toolbarRectHome) {
 			PageWindowNavigateHome(pWin);
-		} else if (r == &toolbarRectStop) {
-			StopLoading(pWin);
+		} else if (r == &toolbarRectStopRefresh) {
+			if (pWin->isLoading) {
+				// stop
+				StopLoading(pWin);
+			} else {
+				// refresh
+				PageWindowNavigateHistory(pWin, 0);
+			}
 		} else {
 			ErrorAlert("Unknown button pressed.");
 		}
