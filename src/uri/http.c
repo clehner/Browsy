@@ -91,13 +91,14 @@ void *HTTPProviderInit(URI *uri, char *uriStr)
 	}
 
 	if (!(urlParser.field_set & (1 << UF_PATH))) {
-		alertf("URL missing path");
-		return NULL;
-	}
-	pathLen = urlParser.field_data[UF_PATH].len;
-	if (!(urlParser.field_set & (1 << UF_PATH))) {
-		alertf("URL missing path");
-		return NULL;
+		// missing path
+		pathLen = 0;
+	} else {
+		pathLen = urlParser.field_data[UF_PATH].len;
+		if (pathLen > sizeof data->path) {
+			alertf("URL path too long");
+			return NULL;
+		}
 	}
 
 	data = malloc(sizeof(struct HTTPURIData));
@@ -108,6 +109,13 @@ void *HTTPProviderInit(URI *uri, char *uriStr)
 	data->port = urlParser.port ? urlParser.port : 80;
 	strncpy(data->host, uriStr + urlParser.field_data[UF_HOST].off, hostLen);
 	strncpy(data->path, uriStr + urlParser.field_data[UF_PATH].off, pathLen);
+
+	// special case: use "/" for empty path
+	if (pathLen == 0) {
+		data->path[0] = '/';
+		pathLen++;
+	}
+
 	data->path[pathLen] = '\0';
 	data->host[hostLen] = '\0';
 

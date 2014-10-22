@@ -274,11 +274,18 @@ char *url_decode(char *str) {
   return buf;
 }
 
-/* Make sure a str is url-encoded */
+/* Make sure a str is url-encoded and has a scheme */
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_sanitize(char *str) {
-  char *pstr = str, *buf = (char*)malloc(strlen(str) * 3 + 1), *pbuf = buf;
+  static const char default_scheme[] = "http://";
+  char *pstr = str,
+       *buf = (char*)malloc(strlen(str) * 3 + sizeof(default_scheme)),
+       *pbuf = buf;
   if (!buf) return NULL;
+  if (!strchr(str, ':')) {
+    strcpy(pbuf, default_scheme);
+    pbuf += sizeof(default_scheme) - 1;
+  }
   while (*pstr) {
     if (isalnum(*pstr) ||
 	  *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' ||
