@@ -43,7 +43,7 @@ endif
 
 # Main
 
-all: $(BIN).bin
+all: deps $(BIN).bin
 
 -include $(CDEP)
 
@@ -94,12 +94,11 @@ $(DEP_DIR)/http-parser/libhttp_parser.a: $(DEP_DIR)/http-parser
 $(DEP_DIR)/c-streams/libcstreams.a: $(DEP_DIR)/c-streams
 	cd $< && make libcstreams.a
 
-$(DEP_DIR)/http-parser: $(DEP_DIR)
-	test -e $@ || git clone https://github.com/joyent/http-parser $@
+$(DEP_DIR)/http-parser: | $(DEP_DIR)
+	git clone https://github.com/joyent/http-parser $@
 
-$(DEP_DIR)/c-streams: $(DEP_DIR)
-	@#git clone https://github.com/clehner/c-streams $@
-	test -e $@ || git clone ../c-streams $@
+$(DEP_DIR)/c-streams: | $(DEP_DIR)
+	git clone https://github.com/clehner/c-streams $@
 
 $(DEP_DIR) $(LIB_DIR):
 	mkdir -p $@
